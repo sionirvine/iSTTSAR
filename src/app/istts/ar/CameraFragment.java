@@ -4,6 +4,7 @@ package app.istts.ar;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,10 +13,15 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import java.util.List;
+
 public class CameraFragment extends Fragment {
 
     private Camera mCamera;
     private CameraPreview mPreview;
+
+    private static final int PICTURE_SIZE_MAX_WIDTH = 1280;
+    private static final int PREVIEW_SIZE_MAX_WIDTH = 640;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -71,6 +77,52 @@ public class CameraFragment extends Fragment {
             mCamera.release(); // release the camera for other applications
             mCamera = null;
         }
+    }
+
+    public void setupCamera() {
+        Camera.Parameters parameters = mCamera.getParameters();
+
+        Size bestPreviewSize = determineBestPreviewSize(parameters);
+        Size bestPictureSize = determineBestPictureSize(parameters);
+
+        parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
+        parameters.setPictureSize(bestPictureSize.width, bestPictureSize.height);
+
+        mCamera.setParameters(parameters);
+    }
+
+    private Size determineBestPreviewSize(Camera.Parameters parameters) {
+        List<Size> sizes = parameters.getSupportedPreviewSizes();
+
+        return determineBestSize(sizes, PREVIEW_SIZE_MAX_WIDTH);
+    }
+
+    private Size determineBestPictureSize(Camera.Parameters parameters) {
+        List<Size> sizes = parameters.getSupportedPictureSizes();
+
+        return determineBestSize(sizes, PICTURE_SIZE_MAX_WIDTH);
+    }
+
+    protected Size determineBestSize(List<Size> sizes, int widthThreshold) {
+        Size bestSize = null;
+
+        for (Size currentSize : sizes) {
+            boolean isDesiredRatio = (currentSize.width / 4) == (currentSize.height / 3);
+            boolean isBetterSize = (bestSize == null || currentSize.width > bestSize.width);
+            boolean isInBounds = currentSize.width <= PICTURE_SIZE_MAX_WIDTH;
+
+            if (isDesiredRatio && isInBounds && isBetterSize) {
+                bestSize = currentSize;
+            }
+        }
+
+        if (bestSize == null) {
+            // listener.onCameraError();
+
+            return sizes.get(0);
+        }
+
+        return bestSize;
     }
 
 }

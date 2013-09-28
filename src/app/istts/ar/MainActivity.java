@@ -8,7 +8,7 @@ import android.view.Menu;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements TrainFragment.CameraTakePicture {
     
     private static final String TAG = "iSTTSAR::MainActivity";
     
@@ -40,11 +40,20 @@ public class MainActivity extends ActionBarActivity {
         
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-    
+
+    public void takePicture() {
+        // CameraFragment cameraFragment = (CameraFragment)
+        // getSupportFragmentManager().findFragmentById(R.id.camera_fragment);
+        CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
+
+        cameraFragment.takePicture();
+        cameraFragment.restartCameraPreview();
+
+    }
+
 }

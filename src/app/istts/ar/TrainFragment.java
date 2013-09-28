@@ -1,10 +1,7 @@
 
 package app.istts.ar;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,29 +12,47 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.File;
 
 public class TrainFragment extends Fragment {
+    
     private final String TAG = "iSTTSAR::MatchImageFragment";
-
+    
+    private CameraTakePicture mCallback;
+    public interface CameraTakePicture {
+        public void takePicture();
+    }
+    
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout mLayout = (LinearLayout) inflater.inflate(
                 R.layout.train_fragment, container, false);
 
-        ImageButton btnSnap = (ImageButton) mLayout
-                .findViewById(R.id.btnSnap);
+        ImageButton btnSnap = (ImageButton) mLayout.findViewById(R.id.btnSnap);
         btnSnap.setOnClickListener(btnSnapListener);
 
         return mLayout;
     }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (CameraTakePicture) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement CameraTakePicture");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
+    };
 
     /** Button Listeners **/
     View.OnClickListener btnSnapListener = new View.OnClickListener() {
@@ -45,95 +60,26 @@ public class TrainFragment extends Fragment {
         @Override
         public void onClick(View v) {
             
-            // take picture
-            
-            
-            
+            String savepath = getActivity().getExternalCacheDir().getAbsolutePath() + "/temp.jpg";
+            File image = new File(savepath);
+            if (image.exists())
+                image.delete();
+
+            if (mCallback == null) {
+                Log.d(TAG, "mCallback is null");
+            } else {
+                mCallback.takePicture();
+            }
+
             FragmentManager fm = getFragmentManager();
 
             UploadDialogFragment uploadDialog = new UploadDialogFragment();
             uploadDialog.setRetainInstance(true);
             uploadDialog.show(fm, "Upload");
+
+            uploadDialog.setImage(savepath);
         }
 
     };
 
-    private class postURL extends AsyncTask<String, String, String> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... urls) {
-            String output = "";
-
-            try {
-                URL myUrl = new URL(urls[0]);
-
-                final HttpURLConnection con = (HttpURLConnection) myUrl.openConnection();
-                output = readStream(con.getInputStream());
-
-            } catch (MalformedURLException err) {
-                Log.d(TAG, err.getMessage().toString());
-            } catch (IOException err) {
-                Log.d(TAG, err.getMessage().toString());
-            }
-
-            return output;
-        }
-
-        private String readStream(InputStream in) {
-            BufferedReader reader = null;
-            String hasil = "";
-
-            try {
-                reader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = reader.readLine()) != null)
-                    hasil += line;
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            return hasil;
-            //
-        }
-
-        /*
-         * private String getOutputFromUrl(URL url) { String hasil = ""; try {
-         * final HttpURLConnection con = (HttpURLConnection)
-         * url.openConnection(); } catch(IOException err) {
-         * Toast.makeText(getActivity().getApplicationContext(),
-         * err.getMessage().toString(), Toast.LENGTH_SHORT).show(); } return
-         * hasil; }
-         */
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-        }
-    }
-
-    public boolean isNetworkAvailable() {
-        ConnectivityManager cm = (ConnectivityManager)
-                getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        // if no network is available networkInfo will be null
-        // otherwise check if we are connected
-        if (networkInfo != null && networkInfo.isConnected()) {
-            return true;
-        }
-        return false;
-    }
 }

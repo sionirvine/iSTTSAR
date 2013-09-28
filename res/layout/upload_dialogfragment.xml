@@ -4,14 +4,22 @@
     android:layout_height="match_parent"
     android:orientation="horizontal" >
 
-
         <ImageView
             android:id="@+id/imgPreview"
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_gravity="center_vertical"
             android:layout_margin="16dp"
-            android:src="@drawable/blank48dp" />
+            android:src="@drawable/blank48dp"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/prgLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="32dp" />
 
         <EditText
             android:id="@+id/txtName"
@@ -20,6 +28,15 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:ems="10" />
+
+        <TextView
+            android:id="@+id/lblStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="status"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btnUpload"

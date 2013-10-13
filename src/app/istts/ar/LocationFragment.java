@@ -1,5 +1,6 @@
 package app.istts.ar;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,17 +8,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,104 +29,97 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/* UPLOAD DIALOGFRAGMENT
- * handle naming image and uploading process to server.
- * show OK if upload complete
+/* LOCATIONFRAGMENT
+ * handle user location; show single button to take picture and match the image.
+ * read user location; if not outdoor = show indoor.
  */
 
-public class UploadDialogFragment extends DialogFragment {
+public class LocationFragment extends Fragment {
 
-    private final static String TAG = "iSTTSAR::UploadDialogFragment";
+    private final String TAG = "iSTTSAR::LocationFragment";
+    private TextView lblLocationStatus;
 
-    private ImageView imgPreview;
-    private ProgressBar prgLoading;
-    private EditText txtName;
-    private Button btnUpload;
-    private TextView lblStatus;
+    private CamTakePicture mCallback;
+
+    public interface CamTakePicture {
+        public void takePicture();
+    }
+
+    // TODO: implement fusedlocationprovider. much smarter than manual GPS.
+    // TODO: implement multi - state location button
+    // TODO: set matching state label
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        LinearLayout mLayout = (LinearLayout) inflater.inflate(R.layout.upload_dialogfragment,
-                container);
+        LinearLayout mLayout = (LinearLayout) inflater.inflate(
+                R.layout.location_fragment, container, false);
 
-        imgPreview = (ImageView) mLayout.findViewById(R.id.imgPreview);
-        prgLoading = (ProgressBar) mLayout.findViewById(R.id.prgLoading);
-        txtName = (EditText) mLayout.findViewById(R.id.txtName);
-        btnUpload = (Button) mLayout.findViewById(R.id.btnUpload);
-        btnUpload.setOnClickListener(btnUploadListener);
-        lblStatus = (TextView) mLayout.findViewById(R.id.lblLocationStatus);
+        ImageButton btnLocation = (ImageButton) mLayout.findViewById(R.id.btnLocation);
+        btnLocation.setOnClickListener(btnLocationListener);
+
+        lblLocationStatus = (TextView) mLayout.findViewById(R.id.lblLocationStatus);
 
         return mLayout;
     }
+    
+    /** BUTTON LISTENER **/
 
-    /** button listener **/
-    View.OnClickListener btnUploadListener = new View.OnClickListener() {
+    View.OnClickListener btnLocationListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (btnUpload.getText().toString().equals("Upload")) {
-                if (isNetworkAvailable()) {
-                    new postURL().execute(new String[] {
-                            "http://lach.hopto.org:8888/cgi/uploadimage"
-                    });
-                } else {
-                    Toast.makeText(getActivity(), "Network not available. Network Problem?",
-                            Toast.LENGTH_LONG).show();
-                }
+            String savepath = getActivity().getExternalCacheDir().getAbsolutePath() + "/temp.jpg";
+            File image = new File(savepath);
+            if (image.exists())
+                image.delete();
+
+            if (mCallback == null) {
+                Log.d(TAG, "mCallback is null");
             } else {
-                dismiss();
+                mCallback.takePicture();
             }
+
+            if (isNetworkAvailable()) {
+                new postURL().execute(new String[] {
+                        "http://lach.hopto.org:8888/cgi/match_training"
+                });
+            } else {
+                Toast.makeText(getActivity(), "Network not available. Network Problem?",
+                        Toast.LENGTH_LONG).show();
+            }
+
 
         }
     };
 
-    /** set image preview from path **/
-    public void setImage(String path) {
-        new SetImageTask().execute(new String[] {
-            path
-        });
-    }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
 
-    /** asynctask untuk mengatasi imgPreview yang belum siap **/
-    class SetImageTask extends AsyncTask<String, Void, String> {
-
-        private File imgFile;
-
-        @Override
-        protected String doInBackground(String... path) {
-            Boolean flag = false;
-            imgFile = new File(path[0]);
-
-            while (!flag) {
-                if (imgPreview != null && imgFile.exists())
-                    flag = true;
-
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            return path[0];
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-
-            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-
-            imgPreview.setImageBitmap(myBitmap);
-            imgPreview.setVisibility(View.VISIBLE);
-            prgLoading.setVisibility(View.GONE);
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (CamTakePicture) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement CamTakePicture");
         }
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
+    };
 
     /** asynctask untuk mengatasi upload file ke server **/
     private class postURL extends AsyncTask<String, String, String> {
 
-        String attachmentName;
         String crlf = "\r\n";
         String twoHyphens = "--";
         String boundary = "*****";
@@ -137,16 +127,6 @@ public class UploadDialogFragment extends DialogFragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
-            this.attachmentName = txtName.getText().toString();
-
-            lblStatus.setText("uploading " + this.attachmentName);
-            imgPreview.setVisibility(View.GONE);
-            txtName.setVisibility(View.GONE);
-            btnUpload.setVisibility(View.GONE);
-
-            prgLoading.setVisibility(View.VISIBLE);
-            lblStatus.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -172,12 +152,6 @@ public class UploadDialogFragment extends DialogFragment {
                         DataOutputStream(con.getOutputStream());
 
                 // ADD PARAMETERS
-                request.writeBytes(this.twoHyphens + this.boundary + this.crlf);
-                request.writeBytes("Content-Type: text/plain" + this.crlf);
-                request.writeBytes("Content-Disposition: form-data; "
-                        + "name=\"desc\"" + this.crlf);
-                request.writeBytes(this.crlf + this.attachmentName + this.crlf);
-
                 request.writeBytes(this.twoHyphens + this.boundary + this.crlf);
                 request.writeBytes("Content-Type: application/octet-stream" + this.crlf);
                 request.writeBytes("Content-Transfer-Encoding: binary" + this.crlf);
@@ -217,18 +191,15 @@ public class UploadDialogFragment extends DialogFragment {
                 request.flush();
                 request.close();
 
-                // dapatkan output dari hasil upload (response)
                 if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     output = readStream(con.getInputStream());
-                    // disconnect setelah selesai melakukan proses baca response
                     con.disconnect();
                 } else {
                     Toast.makeText(getActivity(), con.getResponseMessage(), Toast.LENGTH_LONG)
                             .show();
-                    
+
                     con.disconnect();
                 }
-
 
             } catch (MalformedURLException err) {
                 Log.d(TAG, err.getMessage().toString());
@@ -243,10 +214,7 @@ public class UploadDialogFragment extends DialogFragment {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            prgLoading.setVisibility(View.GONE);
-            lblStatus.setText(result);
-            btnUpload.setVisibility(View.VISIBLE);
-            btnUpload.setText("OK");
+            lblLocationStatus.setText(result);
         }
 
         private String readStream(InputStream in) {

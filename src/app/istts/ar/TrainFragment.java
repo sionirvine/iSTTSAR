@@ -1,4 +1,3 @@
-
 package app.istts.ar;
 
 import android.app.Activity;
@@ -13,6 +12,10 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import java.io.File;
+
+/* LOCATIONFRAGMENT
+ * handle train button; upload user image from camera to web server
+ */
 
 public class TrainFragment extends Fragment {
     

@@ -30,12 +30,24 @@
             android:ems="10" />
 
         <TextView
-            android:id="@+id/lblStatus"
+            android:id="@+id/lblLocationStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:text="status"
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="32dp"
+            android:max="100"
+            android:progress="0"
             android:visibility="gone" />
 
         <Button

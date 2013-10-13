@@ -1,4 +1,3 @@
-
 package app.istts.ar;
 
 import android.content.Context;
@@ -17,6 +16,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.io.FileOutputStream;
+
+/* CAMERAFRAGMENT
+ * show camera preview on a fragment
+ */
 
 public class CameraFragment extends Fragment {
     
@@ -61,7 +64,6 @@ public class CameraFragment extends Fragment {
     }
 
     public void takePicture() {
-        Log.d(TAG, "PICTURE TAKEN");
         mCamera.takePicture(null, null, new PhotoHandler(getActivity().getApplicationContext()));
     }
 
@@ -147,7 +149,7 @@ public class CameraFragment extends Fragment {
     AutoFocusCallback myAutoFocusCallback = new AutoFocusCallback() {
         @Override
         public void onAutoFocus(boolean success, Camera camera) {
-
+            // null procedure. to handle autofocus.
         }
     };
 

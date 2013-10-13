@@ -8,12 +8,18 @@ import android.view.Menu;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class MainActivity extends ActionBarActivity implements TrainFragment.CameraTakePicture {
+/* MAINACTIVITY
+ * handle multiple fragments; show them on the screen
+ */
+
+public class MainActivity extends ActionBarActivity implements TrainFragment.CameraTakePicture,
+        LocationFragment.CamTakePicture {
     
     private static final String TAG = "iSTTSAR::MainActivity";
     
     private Fragment cameraFragment;
     private Fragment trainFragment;
+    private Fragment locationFragment;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,15 +34,20 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
         
         cameraFragment = new CameraFragment();
         trainFragment = new TrainFragment();
+        locationFragment = new LocationFragment();
         
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-        .replace(R.id.content_frame, cameraFragment)
-        .commit();
+                .replace(R.id.camera_frame, cameraFragment)
+                .commit();
         
         fragmentManager.beginTransaction()
-        .replace(R.id.control_frame, trainFragment)
-        .commit();
+                .replace(R.id.train_frame, trainFragment)
+                .commit();
+        
+        fragmentManager.beginTransaction()
+                .replace(R.id.location_frame, locationFragment)
+                .commit();
         
     }
 
@@ -47,12 +58,13 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
     }
 
     public void takePicture() {
-        // CameraFragment cameraFragment = (CameraFragment)
-        // getSupportFragmentManager().findFragmentById(R.id.camera_fragment);
         CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
 
         cameraFragment.takePicture();
         cameraFragment.restartCameraPreview();
+    }
+
+    public void takePicture2() {
 
     }
 

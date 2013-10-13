@@ -12,6 +12,10 @@ import android.view.ViewGroup;
 import java.io.IOException;
 import java.util.List;
 
+/* CAMERAPREVIEW
+ * handle device camera hardware; show them on a surfaceHolder.
+ */
+
 public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 
     private final static String TAG = "iSTTSAR::CameraPreview";

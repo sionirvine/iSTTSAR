@@ -4,20 +4,39 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity" >
 
-    <!-- The main content view -->
+    <!-- The first (most background) container -->
 
     <FrameLayout
-        android:id="@+id/content_frame"
+        android:id="@+id/camera_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
     </FrameLayout>
     
-    <!-- The main controls view -->
+    <!-- The second (second from back) container -->
 
     <FrameLayout
-        android:id="@+id/control_frame"
+        android:id="@+id/object_frame"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
+    </FrameLayout>
+    
+    <!-- The third (third from back) container -->
+
+    <FrameLayout
+        android:id="@+id/location_frame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true" >
+    </FrameLayout>
+    
+    <FrameLayout
+        android:id="@+id/train_frame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true" >
+
     </FrameLayout>
 
 </RelativeLayout>

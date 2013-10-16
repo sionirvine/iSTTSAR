@@ -23,7 +23,7 @@ public class TrainFragment extends Fragment {
     
     private CameraTakePicture mCallback;
     public interface CameraTakePicture {
-        public void takePicture();
+        public void takePicture(String path);
     }
     
     @Override
@@ -71,7 +71,7 @@ public class TrainFragment extends Fragment {
             if (mCallback == null) {
                 Log.d(TAG, "mCallback is null");
             } else {
-                mCallback.takePicture();
+                mCallback.takePicture(savepath);
             }
 
             FragmentManager fm = getFragmentManager();

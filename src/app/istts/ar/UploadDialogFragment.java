@@ -220,14 +220,12 @@ public class UploadDialogFragment extends DialogFragment {
                 // dapatkan output dari hasil upload (response)
                 if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     output = readStream(con.getInputStream());
-                    // disconnect setelah selesai melakukan proses baca response
-                    con.disconnect();
                 } else {
-                    Toast.makeText(getActivity(), con.getResponseMessage(), Toast.LENGTH_LONG)
-                            .show();
-                    
-                    con.disconnect();
+                    output = con.getResponseMessage();
                 }
+
+                // disconnect setelah selesai melakukan proses baca response
+                con.disconnect();
 
 
             } catch (MalformedURLException err) {

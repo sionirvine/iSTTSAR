@@ -63,8 +63,10 @@ public class CameraFragment extends Fragment {
         mPreview.setCamera(mCamera);
     }
 
-    public void takePicture() {
-        mCamera.takePicture(null, null, new PhotoHandler(getActivity().getApplicationContext()));
+    public void takePicture(String path) {
+        PhotoHandler photoHandler = new PhotoHandler(getActivity().getApplicationContext());
+        photoHandler.setPath(path);
+        mCamera.takePicture(null, null, photoHandler);
     }
 
     /** BACKGROUND **/
@@ -102,42 +104,41 @@ public class CameraFragment extends Fragment {
     /** release the camera for other applications **/
     private void releaseCamera() {
         if (mCamera != null) {
+            mCamera.setPreviewCallback(null);
             mCamera.stopPreview();
             mCamera.release();
             mCamera = null;
         }
     }
 
-    /** restart camera preview for resuming after taking picture **/
-    public void restartCameraPreview() {
-        if (mCamera != null) {
-            mCamera.startPreview();
-        }
-    }
-
     private class PhotoHandler implements PictureCallback {
 
         private final Context context;
+        private String path;
 
         public PhotoHandler(Context context) {
             this.context = context;
+            path = "";
+        }
+
+        public void setPath(String path) {
+            this.path = path;
         }
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            String savepath = getActivity().getExternalCacheDir().getAbsolutePath() + "/temp.jpg";
-
             try {
                 Bitmap savedPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
                 // resize picture
                 Bitmap resizedBitmap = Bitmap.createScaledBitmap(savedPicture, 640, 480, true);
 
-                FileOutputStream out = new FileOutputStream(savepath);
+                FileOutputStream out = new FileOutputStream(path);
                 resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
                 out.close();
 
-                Log.d(TAG, "image saved to " + savepath);
-
+                /** restart camera preview for resuming after taking picture **/
+                camera.startPreview();
+                Log.d(TAG, "image saved to " + path);
             } catch (Exception error) {
                 Log.d(TAG, "image could not be saved : " + error.toString());
                 Toast.makeText(context, "Image could not be saved.", Toast.LENGTH_LONG).show();

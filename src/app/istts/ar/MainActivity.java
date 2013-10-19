@@ -29,6 +29,7 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
     private Fragment cameraFragment;
     private Fragment trainFragment;
     private Fragment locationFragment;
+    private Fragment augmentedRealityFragment;
 
     /** CHECK FOR GOOGLE PLAY SERVICES **/
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
@@ -109,15 +110,20 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
                     "Google Play Services is needed to work properly",
                     Toast.LENGTH_LONG).show();
 
+        augmentedRealityFragment = new AugmentedRealityFragment();
         cameraFragment = new CameraFragment();
         trainFragment = new TrainFragment();
         locationFragment = new LocationFragment();
-        
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.camera_frame, cameraFragment)
                 .commit();
         
+        fragmentManager.beginTransaction()
+                .replace(R.id.object_frame, augmentedRealityFragment)
+                .commit();
+
         fragmentManager.beginTransaction()
                 .replace(R.id.train_frame, trainFragment)
                 .commit();

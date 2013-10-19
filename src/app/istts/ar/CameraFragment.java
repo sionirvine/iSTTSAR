@@ -32,8 +32,8 @@ public class CameraFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (checkCameraHardware(this.getActivity())) {
-            mPreview = new CameraPreview(this.getActivity());
+        if (checkCameraHardware(getActivity())) {
+            mPreview = new CameraPreview(getActivity());
         } else {
             Toast.makeText(getActivity(), "Camera is not found!", Toast.LENGTH_LONG).show();
         }
@@ -64,7 +64,7 @@ public class CameraFragment extends Fragment {
     }
 
     public void takePicture(String path) {
-        PhotoHandler photoHandler = new PhotoHandler(getActivity().getApplicationContext());
+        final PhotoHandler photoHandler = new PhotoHandler(getActivity().getApplicationContext());
         photoHandler.setPath(path);
         mCamera.takePicture(null, null, photoHandler);
     }
@@ -96,7 +96,7 @@ public class CameraFragment extends Fragment {
             c = Camera.open();
         } catch (Exception e) {
             // Camera is not available
-            Log.d(TAG, "Camera is not available!");
+            Log.e(TAG, "Camera is not available!");
         }
         return c;
     }
@@ -118,7 +118,7 @@ public class CameraFragment extends Fragment {
 
         public PhotoHandler(Context context) {
             this.context = context;
-            path = "";
+            this.path = "";
         }
 
         public void setPath(String path) {
@@ -127,21 +127,24 @@ public class CameraFragment extends Fragment {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            try {
-                Bitmap savedPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
-                // resize picture
-                Bitmap resizedBitmap = Bitmap.createScaledBitmap(savedPicture, 640, 480, true);
+            if (!path.equals("")) {
+                try {
 
-                FileOutputStream out = new FileOutputStream(path);
-                resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                out.close();
+                    Bitmap savedPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    // resize picture
+                    Bitmap resizedBitmap = Bitmap.createScaledBitmap(savedPicture, 640, 480, true);
 
-                /** restart camera preview for resuming after taking picture **/
-                camera.startPreview();
-                Log.d(TAG, "image saved to " + path);
-            } catch (Exception error) {
-                Log.d(TAG, "image could not be saved : " + error.toString());
-                Toast.makeText(context, "Image could not be saved.", Toast.LENGTH_LONG).show();
+                    FileOutputStream out = new FileOutputStream(path);
+                    resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    out.close();
+
+                    /** restart camera preview for resuming after taking picture **/
+                    camera.startPreview();
+                    Log.d(TAG, "image saved to " + path);
+                } catch (Exception error) {
+                    Log.e(TAG, "image could not be saved : " + error.toString());
+                    Toast.makeText(context, "Image could not be saved.", Toast.LENGTH_LONG).show();
+                }
             }
         }
 

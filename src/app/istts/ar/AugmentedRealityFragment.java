@@ -4,6 +4,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -52,11 +54,12 @@ public class AugmentedRealityFragment extends SensorsFragment implements OnTouch
         // GooglePlacesDataSource(this.getResources());
         // sources.put("googlePlaces", googlePlaces);
 
-        ARData.setRadius(100f);
+        ARData.setRadius(50f);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        augmentedRealityView.setOnTouchListener(this);
         return augmentedRealityView;
     }
 
@@ -79,6 +82,7 @@ public class AugmentedRealityFragment extends SensorsFragment implements OnTouch
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        Log.d(TAG, "touched");
         for (Marker marker : ARData.getMarkers()) {
             if (marker.handleClick(event.getX(), event.getY())) {
                 if (event.getAction() == MotionEvent.ACTION_UP)
@@ -91,7 +95,11 @@ public class AugmentedRealityFragment extends SensorsFragment implements OnTouch
     }
 
     protected void markerTouched(Marker marker) {
-        Log.w(TAG, "markerTouched() not implemented.");
+        FragmentManager fm = getFragmentManager();
+
+        DialogFragment crDialog = CommentsRatingDialogFragment.setDialogTitle(marker.getName());
+        crDialog.setRetainInstance(true);
+        crDialog.show(fm, "Comments");
     }
 
     @Override

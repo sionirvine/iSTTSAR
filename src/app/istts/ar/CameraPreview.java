@@ -1,3 +1,4 @@
+
 package app.istts.ar;
 
 import android.content.Context;
@@ -30,14 +31,14 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
     private List<Size> mSupportedPreviewSizes;
 
     // private static final double ASPECT_RATIO = 4.0 / 3.0;
-    
+
     @SuppressWarnings("deprecation")
     public CameraPreview(Context context) {
         super(context);
-        
+
         mSurfaceView = new SurfaceView(context);
         addView(mSurfaceView);
-        
+
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
         mHolder = mSurfaceView.getHolder();
@@ -45,10 +46,12 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         mHolder.addCallback(this);
     }
-    
+
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        // The Surface has been created, now tell the camera where to draw the preview.
+        
+        // The Surface has been created, now tell the camera where to draw the
+        // preview.
         if (mCamera != null) {
             try {
                 mCamera.setPreviewDisplay(holder);
@@ -60,15 +63,14 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
             requestLayout();
         mSurfaceCreated = true;
     }
-    
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
-        
-        if (mHolder.getSurface() == null){
+
+        if (mHolder.getSurface() == null) {
             // preview surface does not exist
             return;
         }
@@ -76,7 +78,7 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
         // stop preview before making changes
         try {
             mCamera.stopPreview();
-        } catch (Exception e){
+        } catch (Exception e) {
             // ignore: tried to stop a non-existent preview
         }
 
@@ -91,7 +93,8 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 
             mCamera.setParameters(parameters);
             mCamera.startPreview();
-        } catch (Exception e){
+
+        } catch (Exception e) {
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
     }
@@ -101,7 +104,7 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
         if (mCamera != null)
             mCamera.stopPreview();
     }
-    
+
     public void setCamera(Camera camera) {
         mCamera = camera;
         if (mCamera != null) {
@@ -111,7 +114,7 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
                 requestLayout();
         }
     }
-    
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
@@ -153,6 +156,7 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 
             int previewWidth = width;
             int previewHeight = height;
+
 
             if (mPreviewSize != null) {
                 previewWidth = mPreviewSize.width;
@@ -207,4 +211,5 @@ public class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
         }
         return optimalSize;
     }
+
 }

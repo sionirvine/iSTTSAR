@@ -40,8 +40,20 @@ public class MarkerDataSource extends DataSource {
         Marker A = new IconMarker("KUTISARI", -7.340415, 112.749836, 0, Color.DKGRAY, icon);
         cachedMarkers.add(A);
 
-        Marker B = new IconMarker("DEPAN RUMAH", -7.317016, 112.756126, 0, Color.BLUE, icon);
+        Marker N = new IconMarker("Gedung N", -7.291322, 112.758876, 20, Color.DKGRAY, icon);
+        cachedMarkers.add(N);
+
+        Marker B = new IconMarker("Gedung B", -7.291028, 112.758879, 30, Color.DKGRAY, icon);
         cachedMarkers.add(B);
+
+        Marker L = new IconMarker("Gedung L", -7.291489, 112.759185, 40, Color.DKGRAY, icon);
+        cachedMarkers.add(L);
+
+        Marker U = new IconMarker("Gedung U", -7.291247, 112.758561, 50, Color.DKGRAY, icon);
+        cachedMarkers.add(U);
+
+        Marker E = new IconMarker("Gedung E", -7.291294, 112.758404, 60, Color.DKGRAY, icon);
+        cachedMarkers.add(E);
 
         // Marker home = new Marker("ATL CIRCLE", 39.931269, -75.051231, 0,
         // Color.YELLOW);

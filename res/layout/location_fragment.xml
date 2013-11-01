@@ -2,13 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="end"
     android:orientation="horizontal" >
+
+    <Button
+        android:id="@+id/btnMaps"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="Maps" />
 
     <TextView
         android:id="@+id/lblLocationStatus"
         android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="bottom|center_vertical"
         android:layout_marginLeft="16dp"
         android:text="Searching..."
         android:textAppearance="?android:attr/textAppearanceSmall" />
@@ -17,7 +26,7 @@
         android:id="@+id/btnLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="bottom|center_vertical"
         android:layout_marginLeft="8dp"
         android:background="@drawable/blank48dp"
         android:src="@drawable/location_idle" />

@@ -3,6 +3,7 @@ package app.istts.ar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -11,18 +12,23 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /* MAINACTIVITY
  * handle multiple fragments; show them on the screen
  */
 
 public class MainActivity extends ActionBarActivity implements TrainFragment.CameraTakePicture,
-        LocationFragment.CamTakePicture {
+        LocationFragment.CamTakePicture, LocationFragment.OCRTakePicture {
     
     private static final String TAG = "iSTTSAR::MainActivity";
     
@@ -98,8 +104,8 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
         
         // remove title
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        // WindowManager.LayoutParams.FLAG_FULLSCREEN);
         
         setContentView(R.layout.activity_main);
         
@@ -110,28 +116,45 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
                     "Google Play Services is needed to work properly",
                     Toast.LENGTH_LONG).show();
 
-        augmentedRealityFragment = new AugmentedRealityFragment();
         cameraFragment = new CameraFragment();
+        augmentedRealityFragment = new AugmentedRealityFragment();
         trainFragment = new TrainFragment();
         locationFragment = new LocationFragment();
 
         FragmentManager fragmentManager = getSupportFragmentManager();
+        // fragmentManager.beginTransaction()
+        // .replace(R.id.camera_frame, cameraFragment)
+        // .commit();
+        //
+        // fragmentManager.beginTransaction()
+        // .replace(R.id.object_frame, augmentedRealityFragment)
+        // .commit();
+        //
+        // fragmentManager.beginTransaction()
+        // .replace(R.id.train_frame, trainFragment)
+        // .commit();
+        //
+        // fragmentManager.beginTransaction()
+        // .replace(R.id.location_frame, locationFragment)
+        // .commit();
+
         fragmentManager.beginTransaction()
                 .replace(R.id.camera_frame, cameraFragment)
                 .commit();
-        
+
         fragmentManager.beginTransaction()
-                .replace(R.id.object_frame, augmentedRealityFragment)
+                .add(R.id.fragment_container, augmentedRealityFragment)
                 .commit();
 
         fragmentManager.beginTransaction()
-                .replace(R.id.train_frame, trainFragment)
+                .add(R.id.fragment_container, trainFragment)
                 .commit();
-        
+
         fragmentManager.beginTransaction()
-                .replace(R.id.location_frame, locationFragment)
+                .add(R.id.fragment_container, locationFragment)
                 .commit();
         
+        copyTrainedData();
     }
 
     @Override
@@ -144,6 +167,65 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
         CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
 
         cameraFragment.takePicture(path);
+    }
+
+    private void copyTrainedData() {
+        try {
+            // String mDirPath = Environment.getExternalStorageDirectory() +
+            // File.separator;
+            File tessDataFolder = new File(getExternalCacheDir().getAbsolutePath()
+                    + File.separator
+                    + "tessdata");
+
+            File trainedData = new File(getExternalCacheDir().getAbsolutePath()
+                    + File.separator
+                    + "tessdata"
+                    + File.separator
+                    + "ind.traineddata");
+
+            if (!trainedData.exists()) {
+                tessDataFolder.mkdir();
+
+                AssetManager assetManager = getAssets();
+                InputStream in = assetManager.open("ind.traineddata");
+                OutputStream out = new FileOutputStream(trainedData.getAbsolutePath());
+                byte[] buf = new byte[8024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                in.close();
+                out.close();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Was unable to copy tesseract data " + e.toString());
+        }
+    }
+
+    @Override
+    public void setOCRMode(Boolean value) {
+        CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
+        cameraFragment.setOCRMode(value);
+    }
+
+    @Override
+    public Boolean getOCRMode() {
+        CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
+        return cameraFragment.getOCRMode();
+    }
+
+    @Override
+    public void swapFragment() {
+        MapsFragment mapsFragment = new MapsFragment();
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, mapsFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
 }

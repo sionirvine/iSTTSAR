@@ -3,7 +3,6 @@ package app.istts.ar;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -15,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,7 +25,6 @@ import com.jwetherell.augmented_reality.data.ARData;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -48,6 +47,16 @@ public class LocationFragment extends Fragment {
     
     public interface CamTakePicture {
         public void takePicture(String path);
+    }
+
+    private OCRTakePicture mOCRCallback;
+
+    public interface OCRTakePicture {
+        public void setOCRMode(Boolean value);
+
+        public Boolean getOCRMode();
+
+        public void swapFragment();
     }
 
     // Define an object that holds accuracy and frequency parameters
@@ -93,6 +102,9 @@ public class LocationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout mLayout = (LinearLayout) inflater.inflate(
                 R.layout.location_fragment, container, false);
+
+        Button btnMaps = (Button) mLayout.findViewById(R.id.btnMaps);
+        btnMaps.setOnClickListener(btnMapsListener);
 
         ImageButton btnLocation = (ImageButton) mLayout.findViewById(R.id.btnLocation);
         btnLocation.setOnClickListener(btnLocationListener);
@@ -157,18 +169,28 @@ public class LocationFragment extends Fragment {
     View.OnClickListener btnLocationListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            final String savepath = getActivity().getExternalCacheDir().getAbsolutePath()
-                    + "/match.jpg";
+            // final String savepath =
+            // getActivity().getExternalCacheDir().getAbsolutePath()
+            // + "/match.jpg";
+            //
+            // final File image = new File(savepath);
+            // if (image.exists())
+            // image.delete();
+            //
+            // if (mCallback == null) {
+            // Log.d(TAG, "mCallback is null");
+            // } else {
+            // mCallback.takePicture(savepath);
+            // Log.d(TAG, "Picture Taken!");
+            // }
 
-            final File image = new File(savepath);
-            if (image.exists())
-                image.delete();
+            if (lblLocationStatus.getText().toString().equals("Indoor")) {
+                if (mOCRCallback.getOCRMode() == true) {
+                    mOCRCallback.setOCRMode(false);
+                } else {
+                    mOCRCallback.setOCRMode(true);
+                }
 
-            if (mCallback == null) {
-                Log.d(TAG, "mCallback is null");
-            } else {
-                mCallback.takePicture(savepath);
-                Log.d(TAG, "Picture Taken!");
             }
 
             /**
@@ -177,27 +199,39 @@ public class LocationFragment extends Fragment {
              * terlebih dahulu
              **/
             // Reuse existing handler to avoid object creation
-            final Handler handler = getActivity().getWindow().getDecorView().getHandler();
-            final Runnable waitTakePic = new Runnable() {
-                @Override
-                public void run() {
-                    if (cameraPicture == null) {
-                        cameraPicture = BitmapFactory.decodeFile(savepath);
-                        handler.postDelayed(this, 250);
-                    } else {
-                        if (isNetworkAvailable()) {
-                            new postURL().execute(new String[] {
-                                    "http://lach.hopto.org:8888/cgi/match_training"
-                            });
-                        } else {
-                            Toast.makeText(getActivity(),
-                                    "Network not available. Network Problem?",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }
-            };
-            handler.post(waitTakePic);
+            // final Handler handler =
+            // getActivity().getWindow().getDecorView().getHandler();
+            // final Runnable waitTakePic = new Runnable() {
+            // @Override
+            // public void run() {
+            // if (cameraPicture == null) {
+            // cameraPicture = BitmapFactory.decodeFile(savepath);
+            // handler.postDelayed(this, 250);
+            // } else {
+            // if (isNetworkAvailable()) {
+            // new postURL().execute(new String[] {
+            // "http://lach.hopto.org:8888/cgi/match_training"
+            // });
+            // } else {
+            // Toast.makeText(getActivity(),
+            // "Network not available. Network Problem?",
+            // Toast.LENGTH_LONG).show();
+            // }
+            // }
+            // }
+            // };
+            // handler.post(waitTakePic);
+
+        }
+    };
+
+    View.OnClickListener btnMapsListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+
+
+            mOCRCallback.swapFragment();
 
         }
     };
@@ -210,6 +244,7 @@ public class LocationFragment extends Fragment {
         // the callback interface. If not, it throws an exception
         try {
             mCallback = (CamTakePicture) activity;
+            mOCRCallback = (OCRTakePicture) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement CamTakePicture");
@@ -220,6 +255,7 @@ public class LocationFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mCallback = null;
+        mOCRCallback = null;
     };
     
     /** asynctask untuk mengatasi upload file ke server **/

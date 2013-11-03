@@ -28,6 +28,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class AugmentedRealityFragment extends SensorsFragment implements OnTouchListener {
+
+    private static AugmentedRealityFragment instance;
+
+    public static AugmentedRealityFragment getInstance() {
+        if (instance == null)
+            instance = new AugmentedRealityFragment();
+        return instance;
+    }
+
     private AugmentedRealityView augmentedRealityView;
 
     private static final String locale = Locale.getDefault().getLanguage();
@@ -44,15 +53,11 @@ public class AugmentedRealityFragment extends SensorsFragment implements OnTouch
         // Local
         MarkerDataSource localData = new MarkerDataSource(this.getResources());
         ARData.addMarkers(localData.getMarkers());
+
+        // Network
         // NetworkDataSource twitter = new
         // TwitterDataSource(this.getResources());
         // sources.put("twitter", twitter);
-        // NetworkDataSource wikipedia = new
-        // WikipediaDataSource(this.getResources());
-        // sources.put("wiki", wikipedia);
-        // NetworkDataSource googlePlaces = new
-        // GooglePlacesDataSource(this.getResources());
-        // sources.put("googlePlaces", googlePlaces);
 
         ARData.setRadius(50f);
     }
@@ -61,6 +66,18 @@ public class AugmentedRealityFragment extends SensorsFragment implements OnTouch
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         augmentedRealityView.setOnTouchListener(this);
         return augmentedRealityView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (augmentedRealityView != null) {
+            ViewGroup parentViewGroup = (ViewGroup) augmentedRealityView.getParent();
+            if (parentViewGroup != null) {
+                parentViewGroup.removeAllViews();
+            }
+        }
     }
 
     @Override

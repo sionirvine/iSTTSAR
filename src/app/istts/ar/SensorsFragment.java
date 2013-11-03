@@ -35,6 +35,14 @@ public class SensorsFragment extends Fragment implements
         GooglePlayServicesClient.OnConnectionFailedListener,
         LocationListener {
 
+    private static SensorsFragment instance;
+
+    public static SensorsFragment getInstance() {
+        if (instance == null)
+            instance = new SensorsFragment();
+        return instance;
+    }
+
     protected static final String TAG = "iSTTSAR::SensorsFragment";
     private static final AtomicBoolean computing = new AtomicBoolean(false);
 

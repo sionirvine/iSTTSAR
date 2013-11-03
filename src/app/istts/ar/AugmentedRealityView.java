@@ -92,4 +92,6 @@ public class AugmentedRealityView extends View {
             updated.add(marker1);
         }
     }
+
+
 }

@@ -19,6 +19,14 @@ import java.io.File;
 
 public class TrainFragment extends Fragment {
     
+    private static TrainFragment instance;
+
+    public static TrainFragment getInstance() {
+        if (instance == null)
+            instance = new TrainFragment();
+        return instance;
+    }
+
     private final String TAG = "iSTTSAR::MatchImageFragment";
     
     private CameraTakePicture mCallback;

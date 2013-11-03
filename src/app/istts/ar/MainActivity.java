@@ -36,6 +36,7 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
     private Fragment trainFragment;
     private Fragment locationFragment;
     private Fragment augmentedRealityFragment;
+    private Fragment mapsFragment;
 
     /** CHECK FOR GOOGLE PLAY SERVICES **/
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
@@ -65,7 +66,6 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
             case CONNECTION_FAILURE_RESOLUTION_REQUEST:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
-
                         break;
                 }
         }
@@ -102,11 +102,8 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // remove title
+        // remove actionbar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-        // WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        
         setContentView(R.layout.activity_main);
         
         // check for google play services
@@ -116,30 +113,16 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
                     "Google Play Services is needed to work properly",
                     Toast.LENGTH_LONG).show();
 
-        cameraFragment = new CameraFragment();
-        augmentedRealityFragment = new AugmentedRealityFragment();
-        trainFragment = new TrainFragment();
-        locationFragment = new LocationFragment();
+        cameraFragment = CameraFragment.getInstance();
+        augmentedRealityFragment = AugmentedRealityFragment.getInstance();
+        trainFragment = TrainFragment.getInstance();
+        locationFragment = LocationFragment.getInstance();
+        mapsFragment = MapsFragment.getInstance();
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        // fragmentManager.beginTransaction()
-        // .replace(R.id.camera_frame, cameraFragment)
-        // .commit();
-        //
-        // fragmentManager.beginTransaction()
-        // .replace(R.id.object_frame, augmentedRealityFragment)
-        // .commit();
-        //
-        // fragmentManager.beginTransaction()
-        // .replace(R.id.train_frame, trainFragment)
-        // .commit();
-        //
-        // fragmentManager.beginTransaction()
-        // .replace(R.id.location_frame, locationFragment)
-        // .commit();
 
         fragmentManager.beginTransaction()
-                .replace(R.id.camera_frame, cameraFragment)
+                .add(R.id.camera_frame, cameraFragment)
                 .commit();
 
         fragmentManager.beginTransaction()
@@ -163,16 +146,8 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
         return true;
     }
 
-    public void takePicture(String path) {
-        CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
-
-        cameraFragment.takePicture(path);
-    }
-
     private void copyTrainedData() {
         try {
-            // String mDirPath = Environment.getExternalStorageDirectory() +
-            // File.separator;
             File tessDataFolder = new File(getExternalCacheDir().getAbsolutePath()
                     + File.separator
                     + "tessdata");
@@ -202,6 +177,11 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
         }
     }
 
+    public void takePicture(String path) {
+        CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
+        cameraFragment.takePicture(path);
+    }
+
     @Override
     public void setOCRMode(Boolean value) {
         CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
@@ -216,14 +196,9 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
 
     @Override
     public void swapFragment() {
-        MapsFragment mapsFragment = new MapsFragment();
-
         FragmentManager fragmentManager = getSupportFragmentManager();
-
-
-
         fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, mapsFragment)
+                .add(R.id.fragment_container, mapsFragment)
                 .addToBackStack(null)
                 .commit();
     }

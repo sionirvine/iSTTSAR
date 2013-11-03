@@ -32,6 +32,14 @@ import java.io.FileOutputStream;
 
 public class CameraFragment extends Fragment {
     
+    private static CameraFragment instance;
+
+    public static CameraFragment getInstance() {
+        if (instance == null)
+            instance = new CameraFragment();
+        return instance;
+    }
+
     private final static String TAG = "iSTTSAR::CameraFragment";
     
     private Camera mCamera;
@@ -101,8 +109,6 @@ public class CameraFragment extends Fragment {
             }
         };
         handler.post(takeImage);
-        // mCamera.setPreviewCallback(this);
-        // mCamera.addCallbackBuffer(new byte[2048]);
     }
 
     @Override

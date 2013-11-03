@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 
-import com.jwetherell.augmented_reality.R;
 import com.jwetherell.augmented_reality.data.DataSource;
 import com.jwetherell.augmented_reality.ui.IconMarker;
 import com.jwetherell.augmented_reality.ui.Marker;
@@ -16,7 +15,11 @@ import java.util.List;
 public class MarkerDataSource extends DataSource {
 
     private List<Marker> cachedMarkers = new ArrayList<Marker>();
-    private static Bitmap icon;
+    private static Bitmap N_icon;
+    private static Bitmap B_icon;
+    private static Bitmap L_icon;
+    private static Bitmap U_icon;
+    private static Bitmap E_icon;
 
     public MarkerDataSource(Resources res) {
         if (res == null)
@@ -28,8 +31,12 @@ public class MarkerDataSource extends DataSource {
     protected void createIcon(Resources res) {
         if (res == null)
             throw new NullPointerException();
-
-        icon = BitmapFactory.decodeResource(res, R.drawable.icon);
+        
+        N_icon = BitmapFactory.decodeResource(res, R.drawable.nicon);
+        B_icon = BitmapFactory.decodeResource(res, R.drawable.bicon);
+        L_icon = BitmapFactory.decodeResource(res, R.drawable.licon);
+        U_icon = BitmapFactory.decodeResource(res, R.drawable.uicon);
+        E_icon = BitmapFactory.decodeResource(res, R.drawable.eicon);
     }
 
     public List<Marker> getMarkers() {
@@ -37,22 +44,19 @@ public class MarkerDataSource extends DataSource {
         // Color.DKGRAY, icon);
         // cachedMarkers.add(atl);
 
-        Marker A = new IconMarker("KUTISARI", -7.340415, 112.749836, 0, Color.DKGRAY, icon);
-        cachedMarkers.add(A);
-
-        Marker N = new IconMarker("Gedung N", -7.291322, 112.758876, 20, Color.DKGRAY, icon);
+        Marker N = new IconMarker("Gedung N", -7.291322, 112.758876, 15, Color.DKGRAY, N_icon);
         cachedMarkers.add(N);
 
-        Marker B = new IconMarker("Gedung B", -7.291028, 112.758879, 30, Color.DKGRAY, icon);
+        Marker B = new IconMarker("Gedung B", -7.291028, 112.758879, 15, Color.DKGRAY, B_icon);
         cachedMarkers.add(B);
 
-        Marker L = new IconMarker("Gedung L", -7.291489, 112.759185, 40, Color.DKGRAY, icon);
+        Marker L = new IconMarker("Gedung L", -7.291489, 112.759185, 15, Color.DKGRAY, L_icon);
         cachedMarkers.add(L);
 
-        Marker U = new IconMarker("Gedung U", -7.291247, 112.758561, 50, Color.DKGRAY, icon);
+        Marker U = new IconMarker("Gedung U", -7.291247, 112.758561, 15, Color.DKGRAY, U_icon);
         cachedMarkers.add(U);
 
-        Marker E = new IconMarker("Gedung E", -7.291294, 112.758404, 60, Color.DKGRAY, icon);
+        Marker E = new IconMarker("Gedung E", -7.291294, 112.758404, 15, Color.DKGRAY, E_icon);
         cachedMarkers.add(E);
 
         // Marker home = new Marker("ATL CIRCLE", 39.931269, -75.051231, 0,

@@ -28,6 +28,12 @@ public abstract class PostToWS extends AsyncTask<String, String, String> {
     private String boundary = "*****";
 
     @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        preExecute();
+    }
+
+    @Override
     protected String doInBackground(String... urls) {
         String output = "";
 
@@ -126,6 +132,8 @@ public abstract class PostToWS extends AsyncTask<String, String, String> {
 
         postResult(result);
     }
+
+    public abstract Void preExecute();
 
     public void addData(final String key, final String value) {
         if (formData == null)

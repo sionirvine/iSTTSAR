@@ -58,6 +58,11 @@ public class CommentsRatingDialogFragment extends DialogFragment {
                     Log.d("test", result);
                     return null;
                 }
+
+                @Override
+                public Void preExecute() {
+                    return null;
+                }
             };
 
             postURL.addData("username", "a");

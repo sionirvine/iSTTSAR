@@ -1,7 +1,10 @@
+
 package app.istts.ar;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
@@ -28,10 +31,12 @@ import java.io.FileOutputStream;
 
 /* CAMERAFRAGMENT
  * show camera preview on a fragment
+ * handle taking picture, OCR using tesseract,
+ * take picture and use WS if OCR failed.
  */
 
 public class CameraFragment extends Fragment {
-    
+
     private static CameraFragment instance;
 
     public static CameraFragment getInstance() {
@@ -41,12 +46,16 @@ public class CameraFragment extends Fragment {
     }
 
     private final static String TAG = "iSTTSAR::CameraFragment";
-    
+
     private Camera mCamera;
     private CameraPreview mPreview;
 
+    private TessBaseAPI baseApi;
     private Boolean stopTake;
     private Boolean ocrMode;
+    private String[] namaruangan;
+
+    private Boolean OCRProcessing;
 
     public void setOCRMode(Boolean value) {
         this.ocrMode = value;
@@ -56,16 +65,38 @@ public class CameraFragment extends Fragment {
         return this.ocrMode.booleanValue();
     }
 
+    private setLocation mCallback;
+
+    public interface setLocation {
+        public void setLocationStatus(String location);
+
+        public void setLocationButtonVisible(Boolean state);
+
+        public void setIndoorLabel(String location);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        /** AMBIL LIST NAMA RUANGAN DARI STRING ARRAY (VALUES) **/
+        Resources res = getResources();
+        namaruangan = res.getStringArray(R.array.namaruangan_array);
+
+        /** INISIALISASI KAMERA **/
         if (checkCameraHardware(getActivity())) {
             mPreview = new CameraPreview(getActivity());
         } else {
             Log.e(TAG, "Camera is not found!");
             Toast.makeText(getActivity(), "Camera is not found!", Toast.LENGTH_LONG).show();
         }
+
+        /** INISIALISASI OCR TESSERACT **/
+        baseApi = new TessBaseAPI();
+        baseApi.setDebug(true);
+        baseApi.init(getActivity().getExternalCacheDir().getAbsolutePath()
+                + File.separator, "ind");
+
     }
 
     @Override
@@ -77,23 +108,24 @@ public class CameraFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        
+
         if (mCamera != null) {
             stopTake = true;
             mPreview.setCamera(null);
             releaseCamera(); // release the camera immediately on pause event
         }
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();
-        
+
         mCamera = getCameraInstance();
         mPreview.setCamera(mCamera);
 
         stopTake = false;
         ocrMode = false;
+        OCRProcessing = false;
         final Handler handler = new Handler();
         Runnable takeImage = new Runnable() {
             @Override
@@ -101,10 +133,11 @@ public class CameraFragment extends Fragment {
                 if (stopTake) {
                     handler.removeCallbacks(this);
                 } else {
-                    if (ocrMode)
+                    if (ocrMode) {
                         mCamera.setOneShotPreviewCallback(asyncTakePicture);
-                    
-                    handler.postDelayed(this, 500);
+                    }
+
+                    handler.postDelayed(this, 1000);
                 }
             }
         };
@@ -124,12 +157,37 @@ public class CameraFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallback = (setLocation) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement setLocation");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
+    };
+
     public void takePicture(String path) {
         final PhotoHandler photoHandler = new PhotoHandler(getActivity().getApplicationContext());
         photoHandler.setPath(path);
         mCamera.takePicture(null, null, photoHandler);
     }
 
+    public void takePictureOCR() {
+        OCRHandler ocrHandler = new OCRHandler(getActivity().getApplicationContext());
+        mCamera.takePicture(null, null, ocrHandler);
+    }
+
+    // ambil gambar dengan async. (untuk OCR)
+    // tidak mengganggu UI.
     private Camera.PreviewCallback asyncTakePicture = new Camera.PreviewCallback() {
 
         @Override
@@ -137,33 +195,51 @@ public class CameraFragment extends Fragment {
             Camera.Parameters parameters = camera.getParameters();
             final Size size = parameters.getPreviewSize();
 
-            if (parameters.getPreviewFormat() == ImageFormat.NV21) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                YuvImage yuvImage = new YuvImage(data,
-                        ImageFormat.NV21,
-                        size.width,
-                        size.height,
-                        null);
-                yuvImage.compressToJpeg(new Rect(0, 0, size.width, size.height),
-                        50, out);
-                byte[] imageBytes = out.toByteArray();
-                Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0,
-                        imageBytes.length);
+            if (OCRProcessing == false) {
+                // mengubah format gambar dari kamera (RAW) dengan YUV ke (JPEG)
+                // RGB.
 
-                TessBaseAPI baseApi = new TessBaseAPI();
-                baseApi.setDebug(true);
-                baseApi.init(getActivity().getExternalCacheDir().getAbsolutePath()
-                        + File.separator, "ind");
-                baseApi.setImage(image);
+                if (parameters.getPreviewFormat() == ImageFormat.NV21) {
+                    OCRProcessing = true;
+                    Log.d(TAG, "PICTURE TAKEN");
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    YuvImage yuvImage = new YuvImage(data,
+                            ImageFormat.NV21,
+                            size.width,
+                            size.height,
+                            null);
+                    yuvImage.compressToJpeg(new Rect(0, 0, size.width, size.height),
+                            80, out);
+                    byte[] imageBytes = out.toByteArray();
+                    Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0,
+                            imageBytes.length);
 
-                String recognizedText = baseApi.getUTF8Text();
-                Log.d(TAG, "TEXT: " + recognizedText);
+                    baseApi.setDebug(true);
+                    baseApi.init(getActivity().getExternalCacheDir().getAbsolutePath()
+                            + File.separator, "ind");
+                    // cek gambar dengan tesseract
+                    baseApi.setImage(Bitmap.createScaledBitmap(image, 320, 240, false));
+                    // ambil hasil dengan getUTF8Text,
+                    // hapus semua whitespace dan simbol dalam text
+                    String text = baseApi.getUTF8Text().replaceAll("\\s|\\W|_", "");
+
+                    baseApi.end();
+                    for (int i = 0; i < namaruangan.length; i++) {
+                        if (text.matches(".*" + namaruangan[i] + ".*")) {
+                            mCallback.setLocationStatus(namaruangan[i]);
+                            Log.d(TAG, "MATCH: " + text);
+                        }
+                    }
+                    Log.d(TAG, "TEXT: " + text);
+                    OCRProcessing = false;
+                    Log.d(TAG, "PICTURE PROCESSED");
+                }
             }
+
         }
     };
 
     /** BACKGROUND **/
-
     View.OnClickListener autoFocusListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -238,6 +314,52 @@ public class CameraFragment extends Fragment {
                     Log.e(TAG, "image could not be saved : " + error.toString());
                     Toast.makeText(context, "Image could not be saved.", Toast.LENGTH_LONG).show();
                 }
+            }
+        }
+    }
+
+    private class OCRHandler implements PictureCallback {
+
+        private final Context context;
+
+        public OCRHandler(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            try {
+                Bitmap savedPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
+                Bitmap resizedBitmap = Bitmap.createScaledBitmap(savedPicture, 640, 480, false);
+
+                baseApi.setDebug(true);
+                baseApi.init(getActivity().getExternalCacheDir().getAbsolutePath()
+                        + File.separator, "ind");
+
+                // cek gambar dengan tesseract
+                baseApi.setImage(resizedBitmap);
+                // ambil hasil dengan getUTF8Text,
+                // hapus semua whitespace dan simbol dalam text
+                String text = baseApi.getUTF8Text().replaceAll("\\s|\\W|_", "");
+
+                baseApi.end();
+
+                for (int i = 0; i < namaruangan.length; i++) {
+                    if (text.matches(".*" + namaruangan[i] + ".*")) {
+                        mCallback.setLocationStatus(namaruangan[i]);
+                        mCallback.setIndoorLabel(namaruangan[i]);
+                        Log.d(TAG, "MATCH: " + text);
+                    }
+                }
+                Log.d(TAG, "TEXT: " + text);
+                mCallback.setLocationButtonVisible(true);
+
+                /** restart camera preview for resuming after taking picture **/
+                camera.startPreview();
+
+            } catch (Exception error) {
+                Log.e(TAG, "OCR Failed : " + error.toString());
+                Toast.makeText(context, "OCR failed", Toast.LENGTH_LONG).show();
             }
         }
     }

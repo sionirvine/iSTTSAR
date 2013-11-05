@@ -15,13 +15,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.jwetherell.augmented_reality.data.ARData;
 
 /* LOCATIONFRAGMENT
- * handle user location; show single button to take picture and match the image.
- * read user location; if not outdoor = show indoor.
+ * show UI for manipulating location
  */
 
 public class LocationFragment extends Fragment {
@@ -36,6 +36,9 @@ public class LocationFragment extends Fragment {
 
     private final String TAG = "iSTTSAR::LocationFragment";
     private TextView lblLocationStatus;
+    private ImageButton btnLocation;
+    private ProgressBar prgOCR;
+    private TextView lblIndoor;
 
     private CamTakePicture mCallback;
     private Bitmap cameraPicture;
@@ -50,6 +53,8 @@ public class LocationFragment extends Fragment {
         public void setOCRMode(Boolean value);
         public Boolean getOCRMode();
         public void swapFragment();
+
+        public void takePictureWithOCR();
     }
 
     @Override
@@ -60,10 +65,13 @@ public class LocationFragment extends Fragment {
         Button btnMaps = (Button) mLayout.findViewById(R.id.btnMaps);
         btnMaps.setOnClickListener(btnMapsListener);
 
-        ImageButton btnLocation = (ImageButton) mLayout.findViewById(R.id.btnLocation);
+        btnLocation = (ImageButton) mLayout.findViewById(R.id.btnLocation);
         btnLocation.setOnClickListener(btnLocationListener);
 
         lblLocationStatus = (TextView) mLayout.findViewById(R.id.lblLocationStatus);
+        lblIndoor = (TextView) mLayout.findViewById(R.id.lblIndoor);
+
+        prgOCR = (ProgressBar) mLayout.findViewById(R.id.prgOCR);
 
         final Handler handler = new Handler();
         final Runnable getLocation = new Runnable() {
@@ -91,18 +99,19 @@ public class LocationFragment extends Fragment {
         public void onClick(View v) {
             // toggle OCR on / off
             if (lblLocationStatus.getText().toString().equals("Indoor")) {
-                if (mOCRCallback.getOCRMode() == true) {
-                    mOCRCallback.setOCRMode(false);
-                } else {
-                    mOCRCallback.setOCRMode(true);
-                }
+                // if (mOCRCallback.getOCRMode() == true) {
+                // mOCRCallback.setOCRMode(false);
+                // } else {
+                // mOCRCallback.setOCRMode(true);
+                // }
+                setLocationButtonVisible(false);
+                mOCRCallback.takePictureWithOCR();
             }
 
         }
     };
 
     View.OnClickListener btnMapsListener = new View.OnClickListener() {
-
         @Override
         public void onClick(View v) {
             mOCRCallback.swapFragment();
@@ -144,4 +153,26 @@ public class LocationFragment extends Fragment {
         return false;
     }
     
+    public void setLocationStatus(String location) {
+        lblLocationStatus.setText(location);
+    }
+
+    public void setIndoorLabel(String location) {
+        lblIndoor.setText(location);
+    }
+
+    public String getIndoorLabel() {
+        return lblIndoor.getText().toString();
+    }
+
+    public void setLocationButtonVisible(Boolean state) {
+        if (state == false) {
+            prgOCR.setVisibility(View.VISIBLE);
+            btnLocation.setVisibility(View.GONE);
+        } else {
+            prgOCR.setVisibility(View.GONE);
+            btnLocation.setVisibility(View.VISIBLE);
+        }
+    }
+
 }

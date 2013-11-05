@@ -6,32 +6,45 @@
 
     <ScrollView
         android:id="@+id/scrollView1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
 
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/imageView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:src="@drawable/blank48dp" />
 
             <TextView
                 android:id="@+id/lblLocationName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="Name"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
                 android:id="@+id/lblLocationDesc"
-                android:layout_width="wrap_content"
+                android:layout_width="325dp"
                 android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="8dp"
                 android:text="description"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -46,23 +59,46 @@
                 android:id="@+id/lblComments"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="Comments"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
                 android:id="@+id/lblComments_content"
-                android:layout_width="wrap_content"
+                android:layout_width="285dp"
                 android:layout_height="wrap_content"
-                android:text="content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="2dp"
+                android:gravity="left"
+                android:maxLines="10"
+                android:minLines="2"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <EditText
+                android:id="@+id/txtComment"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:visibility="gone" >
+
+                <requestFocus />
+            </EditText>
 
             <Button
                 android:id="@+id/btnAddComments"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add Comments" />
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:text="Login to Comment" />
 
         </LinearLayout>
+
+
+            
+
+
     </ScrollView>
 
 </LinearLayout>

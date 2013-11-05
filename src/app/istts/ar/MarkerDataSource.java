@@ -44,19 +44,20 @@ public class MarkerDataSource extends DataSource {
         // Color.DKGRAY, icon);
         // cachedMarkers.add(atl);
 
-        Marker N = new IconMarker("Gedung N", -7.291322, 112.758876, 15, Color.DKGRAY, N_icon);
+        Marker N = new IconMarker("Gedung N", -7.291322, 112.758876, 15, Color.rgb(139, 69, 19),
+                N_icon);
         cachedMarkers.add(N);
 
-        Marker B = new IconMarker("Gedung B", -7.291028, 112.758879, 15, Color.DKGRAY, B_icon);
+        Marker B = new IconMarker("Gedung B", -7.291028, 112.758879, 15, Color.RED, B_icon);
         cachedMarkers.add(B);
 
-        Marker L = new IconMarker("Gedung L", -7.291489, 112.759185, 15, Color.DKGRAY, L_icon);
+        Marker L = new IconMarker("Gedung L", -7.291489, 112.759185, 15, Color.BLUE, L_icon);
         cachedMarkers.add(L);
 
-        Marker U = new IconMarker("Gedung U", -7.291247, 112.758561, 15, Color.DKGRAY, U_icon);
+        Marker U = new IconMarker("Gedung U", -7.291247, 112.758561, 15, Color.WHITE, U_icon);
         cachedMarkers.add(U);
 
-        Marker E = new IconMarker("Gedung E", -7.291294, 112.758404, 15, Color.DKGRAY, E_icon);
+        Marker E = new IconMarker("Gedung E", -7.291294, 112.758404, 15, Color.YELLOW, E_icon);
         cachedMarkers.add(E);
 
         // Marker home = new Marker("ATL CIRCLE", 39.931269, -75.051231, 0,

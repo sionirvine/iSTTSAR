@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.view.View;
 
-import com.jwetherell.augmented_reality.activity.AugmentedReality;
 import com.jwetherell.augmented_reality.data.ARData;
 import com.jwetherell.augmented_reality.ui.Marker;
 import com.jwetherell.augmented_reality.ui.Radar;
@@ -22,7 +21,7 @@ public class AugmentedRealityView extends View {
     private static final float[] locationArray = new float[3];
     private static final List<Marker> cache = new ArrayList<Marker>();
     private static final TreeSet<Marker> updated = new TreeSet<Marker>();
-    private static final int COLLISION_ADJUSTMENT = 100;
+    private static final int COLLISION_ADJUSTMENT = 50;
 
     public AugmentedRealityView(Context context) {
         super(context);
@@ -47,8 +46,8 @@ public class AugmentedRealityView extends View {
             }
             collection = cache;
 
-            if (AugmentedReality.useCollisionDetection)
-                adjustForCollisions(canvas, collection);
+
+            adjustForCollisions(canvas, collection);
 
             // Draw AR markers in reverse order since the last drawn should be
             // the closest
@@ -59,8 +58,8 @@ public class AugmentedRealityView extends View {
             }
 
             // Radar circle and radar markers
-            if (AugmentedReality.showRadar)
-                radar.draw(canvas);
+            radar.draw(canvas);
+
             drawing.set(false);
         }
     }

@@ -2,9 +2,11 @@ package app.istts.ar;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -28,8 +30,11 @@ import java.io.OutputStream;
  */
 
 public class MainActivity extends ActionBarActivity implements TrainFragment.CameraTakePicture,
-        LocationFragment.CamTakePicture, LocationFragment.OCRTakePicture {
+        LocationFragment.CamTakePicture, LocationFragment.OCRTakePicture,
+        CameraFragment.setLocation, MapsFragment.getIndoorLocation {
     
+    PowerManager.WakeLock wakeLock;
+
     private static final String TAG = "iSTTSAR::MainActivity";
     
     private Fragment cameraFragment;
@@ -102,6 +107,11 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(
+                PowerManager.SCREEN_DIM_WAKE_LOCK, "iSTTSAR wakelook");
+        wakeLock.acquire();
+
         // remove actionbar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
@@ -141,6 +151,24 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        wakeLock.acquire();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        wakeLock.release();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        wakeLock.release();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
@@ -152,26 +180,29 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
                     + File.separator
                     + "tessdata");
 
-            File trainedData = new File(getExternalCacheDir().getAbsolutePath()
-                    + File.separator
-                    + "tessdata"
-                    + File.separator
-                    + "ind.traineddata");
+            AssetManager assetManager = getAssets();
+            for (String s : assetManager.list("ind")) {
+                File trainedData = new File(getExternalCacheDir().getAbsolutePath()
+                        + File.separator
+                        + "tessdata"
+                        + File.separator
+                        + s);
 
-            if (!trainedData.exists()) {
-                tessDataFolder.mkdir();
+                if (!trainedData.exists()) {
+                    tessDataFolder.mkdir();
 
-                AssetManager assetManager = getAssets();
-                InputStream in = assetManager.open("ind.traineddata");
-                OutputStream out = new FileOutputStream(trainedData.getAbsolutePath());
-                byte[] buf = new byte[8024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
+                    InputStream in = assetManager.open("ind/" + s);
+                    OutputStream out = new FileOutputStream(trainedData.getAbsolutePath());
+                    byte[] buf = new byte[8024];
+                    int len;
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                    in.close();
+                    out.close();
                 }
-                in.close();
-                out.close();
             }
+
         } catch (IOException e) {
             Log.e(TAG, "Was unable to copy tesseract data " + e.toString());
         }
@@ -201,6 +232,37 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
                 .add(R.id.fragment_container, mapsFragment)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Override
+    public void setLocationStatus(String location) {
+        LocationFragment locFragment = (LocationFragment) this.locationFragment;
+        locFragment.setLocationStatus(location);
+    }
+
+    @Override
+    public void takePictureWithOCR() {
+        CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
+        cameraFragment.takePictureOCR();
+    }
+
+    @Override
+    public void setLocationButtonVisible(Boolean state) {
+        LocationFragment locFragment = (LocationFragment) this.locationFragment;
+        locFragment.setLocationButtonVisible(state);
+    }
+
+    @Override
+    public void setIndoorLabel(String location) {
+        LocationFragment locFragment = (LocationFragment) this.locationFragment;
+        locFragment.setIndoorLabel(location);
+    }
+
+    @Override
+    public String getIndoorLabel() {
+        LocationFragment locFragment = (LocationFragment) this.locationFragment;
+
+        return locFragment.getIndoorLabel();
     }
 
 }

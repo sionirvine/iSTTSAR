@@ -27,8 +27,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * This class extends Activity and processes sensor data and location data.
+ * This class extends Fragment and processes sensor data and location data. this
+ * includes: GPS, Accelerometer, Magnetic Field. extended by
+ * AugmentedRealityFragment
  */
+
 public class SensorsFragment extends Fragment implements
         SensorEventListener,
         GooglePlayServicesClient.ConnectionCallbacks,
@@ -91,8 +94,8 @@ public class SensorsFragment extends Fragment implements
         mLocationRequest.setPriority(
                 LocationRequest.PRIORITY_HIGH_ACCURACY);
         // 5 seconds for normal interval
-        mLocationRequest.setInterval(5000);
         // 1 seconds for fast interval
+        mLocationRequest.setInterval(5000);
         mLocationRequest.setFastestInterval(1000);
 
         /** save settings on sharedpreferences **/
@@ -146,28 +149,7 @@ public class SensorsFragment extends Fragment implements
             sensorMgr.registerListener(this, sensorGrav, SensorManager.SENSOR_DELAY_NORMAL);
             sensorMgr.registerListener(this, sensorMag, SensorManager.SENSOR_DELAY_NORMAL);
 
-            // locationMgr = (LocationManager) getActivity()
-            // .getSystemService(Context.LOCATION_SERVICE);
-            // locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-            // MIN_TIME,
-            // MIN_DISTANCE, this);
-
             try {
-
-                // try {
-                // Location gps =
-                // locationMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                // Location network = locationMgr
-                // .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                // if (gps != null)
-                // onLocationChanged(gps);
-                // else if (network != null)
-                // onLocationChanged(network);
-                // else
-                // onLocationChanged(ARData.hardFix);
-                // } catch (Exception ex2) {
-                // onLocationChanged(ARData.hardFix);
-                // }
 
                 gmf = new GeomagneticField((float) ARData.getCurrentLocation().getLatitude(),
                         (float) ARData.getCurrentLocation().getLongitude(),
@@ -260,6 +242,7 @@ public class SensorsFragment extends Fragment implements
     public void onResume() {
         super.onResume();
 
+        // fusedLocPro
         if (mPrefs.contains("KEY_UPDATES_ON")) {
             mUpdatesRequested =
                     mPrefs.getBoolean("KEY_UPDATES_ON", false);
@@ -354,7 +337,9 @@ public class SensorsFragment extends Fragment implements
      */
     @Override
     public void onLocationChanged(Location location) {
+
         ARData.setCurrentLocation(location);
+
         gmf = new GeomagneticField((float) ARData.getCurrentLocation().getLatitude(),
                 (float) ARData.getCurrentLocation().getLongitude(),
                 (float) ARData.getCurrentLocation().getAltitude(), System.currentTimeMillis());

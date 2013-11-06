@@ -18,7 +18,6 @@ import java.util.List;
 public class MarkerDataSource extends DataSource {
 
     private List<Marker> cachedMarkers = new ArrayList<Marker>();
-    private static Bitmap M_icon;
     private static Bitmap N_icon;
     private static Bitmap B_icon;
     private static Bitmap L_icon;
@@ -36,7 +35,6 @@ public class MarkerDataSource extends DataSource {
         if (res == null)
             throw new NullPointerException();
 
-        M_icon = BitmapFactory.decodeResource(res, R.drawable.micon);
         N_icon = BitmapFactory.decodeResource(res, R.drawable.nicon);
         B_icon = BitmapFactory.decodeResource(res, R.drawable.bicon);
         L_icon = BitmapFactory.decodeResource(res, R.drawable.licon);
@@ -114,9 +112,6 @@ public class MarkerDataSource extends DataSource {
                                 } else if (gedung.toLowerCase().equals("e")) {
                                     color = Color.YELLOW;
                                     icon = E_icon;
-                                } else {
-                                    color = Color.MAGENTA;
-                                    icon = M_icon;
                                 }
 
                                 Marker marker = new IconMarker(name, latitude, longitude,
@@ -220,9 +215,6 @@ public class MarkerDataSource extends DataSource {
                                 } else if (gedung.toLowerCase().equals("e")) {
                                     color = Color.YELLOW;
                                     icon = E_icon;
-                                } else {
-                                    color = Color.MAGENTA;
-                                    icon = M_icon;
                                 }
 
                                 Marker marker = new IconMarker(name, latitude, longitude,

@@ -4,6 +4,7 @@ package app.istts.ar;
 import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.view.InflateException;
 import android.view.LayoutInflater;
@@ -31,13 +32,17 @@ public class MapsFragment extends Fragment {
     }
 
     private GoogleMap maps;
-    LinearLayout mLayout;
+    private LinearLayout mLayout;
     private static View view;
 
+    private Boolean stopTake = false;
+    private com.google.android.gms.maps.model.Marker userLocation;
     private getIndoorLocation mCallback;
 
     public interface getIndoorLocation {
         public String getIndoorLabel();
+
+        public String getLocationStatus();
     }
 
     @Override
@@ -90,29 +95,86 @@ public class MapsFragment extends Fragment {
             } else if (namagedung.equals("e")) {
                 // kuning
                 marker.icon(BitmapDescriptorFactory.defaultMarker(60));
-            } else if (namagedung.equals("m")) {
-                // pink
-                marker.icon(BitmapDescriptorFactory.defaultMarker(300));
             }
 
             maps.addMarker(marker);
         }
 
-        if (!mCallback.getIndoorLabel().equals("")) {
-            if (mCallback.getIndoorLabel().equals("B301")) {
-                MarkerOptions marker = new MarkerOptions();
-                marker.position(new LatLng(-7.291153, 112.758765));
-                marker.title("my location");
-                marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.current_loc));
+        // tambah marker posisi user
+        MarkerOptions mo = new MarkerOptions();
+        mo.position(new LatLng(-7.30619, 112.76189));
+        mo.title("my location");
+        mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.current_loc));
+        userLocation = maps.addMarker(mo);
 
-                maps.addMarker(marker);
 
-                Location location = new Location("B301");
-                location.setLatitude(-7.291153);
-                location.setLongitude(112.758765);
-                ARData.setCurrentLocation(location);
+        stopTake = false;
+        // tampilkan posisi user dalam map
+        final Handler handler = new Handler();
+        Runnable showUserPos = new Runnable() {
+            @Override
+            public void run() {
+                if (stopTake) {
+                    handler.removeCallbacks(this);
+                } else {
+                    // ketika outdoor
+                    if (mCallback.getLocationStatus().equals("outdoor")) {
+                        Double lat = ARData.getCurrentLocation().getLatitude();
+                        Double lng = ARData.getCurrentLocation().getLongitude();
+
+                        userLocation.setPosition(new LatLng(lat, lng));
+
+                        // ketika indoor
+                    } else {
+                        // tampilkan posisi dengan membaca hasil indoor
+                        // positioning
+                        if (!mCallback.getIndoorLabel().trim().equals("")) {
+
+                            PostToWS postURL = new PostToWS() {
+
+                                @Override
+                                public Void preExecute() {
+                                    return null;
+                                }
+
+                                @Override
+                                public String postResult(String result) {
+
+                                    if (!result.trim().equals("false") || result.length() > 1) {
+                                        String[] split = result.split(",");
+                                        Double lat = Double.parseDouble(split[0]);
+                                        Double lng = Double.parseDouble(split[1]);
+
+                                        Location location = new Location("myloc");
+                                        location.setLatitude(lat);
+                                        location.setLongitude(lng);
+                                        ARData.setCurrentLocation(location);
+                                    }
+                                    return result;
+                                }
+                            };
+
+                            postURL.addData("name", mCallback.getIndoorLabel().trim());
+
+                            postURL.execute(new String[] {
+                                    "http://lach.hopto.org:8080/isttsar.ws/marker/getlatlng"
+                            });
+
+                        }
+                    }
+
+                    handler.postDelayed(this, 2000);
+                }
             }
-        }
+        };
+        handler.post(showUserPos);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        stopTake = true;
     }
 
     @Override

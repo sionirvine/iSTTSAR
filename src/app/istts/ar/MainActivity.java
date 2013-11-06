@@ -308,6 +308,12 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
     }
 
     @Override
+    public String getLocationStatus() {
+        LocationFragment locFragment = (LocationFragment) this.locationFragment;
+        return locFragment.getLocationStatus();
+    }
+
+    @Override
     public void takePictureWithOCR() {
         CameraFragment cameraFragment = (CameraFragment) this.cameraFragment;
         cameraFragment.takePictureOCR();

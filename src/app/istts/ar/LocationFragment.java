@@ -82,7 +82,7 @@ public class LocationFragment extends Fragment {
             public void run() {
                 Location currentLocation = ARData.getCurrentLocation();
                 if (currentLocation != null) {
-                    if (currentLocation.getAccuracy() < 7.1f) {
+                    if (currentLocation.getAccuracy() < 5.1f) {
                         lblLocationStatus.setText("Outdoor");
                     } else {
                         lblLocationStatus.setText("Indoor");
@@ -134,7 +134,15 @@ public class LocationFragment extends Fragment {
                         @Override
                         public String postResult(String result) {
                             setLocationButtonVisible(true);
-                            mOCRCallback.setIndoorLabel(result);
+                            
+                            // result from openCV
+                            // example: "result: B-403"
+                            //           0123456789012
+                            if (!result.trim().equals("")) {
+                                String trimResult = result.substring(8, result.length());
+                                mOCRCallback.setIndoorLabel(trimResult);
+                            }
+                            
                             return result;
                         }
                     };
@@ -192,6 +200,10 @@ public class LocationFragment extends Fragment {
         return false;
     }
     
+    public String getLocationStatus() {
+        return lblLocationStatus.getText().toString().toLowerCase();
+    }
+
     public void setLocationStatus(String location) {
         lblLocationStatus.setText(location);
     }

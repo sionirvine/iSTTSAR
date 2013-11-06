@@ -47,8 +47,8 @@ public class AugmentedRealityFragment extends SensorsFragment implements OnTouch
         super.onCreate(savedInstanceState);
         augmentedRealityView = new AugmentedRealityView(getActivity());
 
-        ARData.setRadius(0.5f);
-        ARData.setZoomLevel(FORMAT.format(0.5f));
+        ARData.setRadius(5f);
+        ARData.setZoomLevel(FORMAT.format(5f));
         // Local
         MarkerDataSource localData = new MarkerDataSource(this.getResources());
         // ARData.addMarkers(localData.getMarkers());
@@ -114,8 +114,7 @@ public class AugmentedRealityFragment extends SensorsFragment implements OnTouch
         String name = marker.getName();
 
         FragmentManager fm = getFragmentManager();
-
-        DialogFragment crDialog = CommentsRatingDialogFragment.setDialog(marker.getName());
+        DialogFragment crDialog = CommentsRatingDialogFragment.setDialog(name);
         crDialog.setRetainInstance(true);
         crDialog.show(fm, "Comments");
     }

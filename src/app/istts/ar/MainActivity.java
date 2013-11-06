@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -154,9 +155,13 @@ public class MainActivity extends ActionBarActivity implements TrainFragment.Cam
                 .add(R.id.fragment_container, augmentedRealityFragment)
                 .commit();
 
-        fragmentManager.beginTransaction()
-                .add(R.id.fragment_container, trainFragment)
-                .commit();
+        SharedPreferences settings = getSharedPreferences("app.istts.ar", 0);
+        String user = settings.getString("loggeduser", "");
+        if (user.toLowerCase().equals("admin")) {
+            fragmentManager.beginTransaction()
+                    .add(R.id.fragment_container, trainFragment)
+                    .commit();
+        }
 
         fragmentManager.beginTransaction()
                 .add(R.id.fragment_container, locationFragment)

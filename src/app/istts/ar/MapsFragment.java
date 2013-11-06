@@ -102,7 +102,6 @@ public class MapsFragment extends Fragment {
         String user = settings.getString("loggeduser", "");
         if (user.toLowerCase().equals("admin")) {
             btnAddMarker.setVisibility(View.VISIBLE);
-
         } else {
             btnAddMarker.setVisibility(View.GONE);
         }

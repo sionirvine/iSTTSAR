@@ -1,5 +1,6 @@
 package app.istts.ar;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -28,7 +29,8 @@ public class CommentsRatingDialogFragment extends DialogFragment {
     private Boolean loggedIn;
     private String loggedUser;
     private RatingBar ratingBar1;
-
+    private Button btnLogout;
+    private Button btnShare;
 
 
     static CommentsRatingDialogFragment setDialog(String name) {
@@ -137,14 +139,23 @@ public class CommentsRatingDialogFragment extends DialogFragment {
 
         txtComment = (EditText) mLayout.findViewById(R.id.txtComment);
         btnAddComments = (Button) mLayout.findViewById(R.id.btnAddComments);
+        btnLogout = (Button) mLayout.findViewById(R.id.btnLogout);
+        btnLogout.setOnClickListener(new btnLogoutListener());
+        btnShare = (Button) mLayout.findViewById(R.id.btnShare);
+        btnShare.setOnClickListener(new btnShareListener());
         btnAddComments.setOnClickListener(btnAddCommentsListener);
+
         if (loggedIn) {
             txtComment.setVisibility(View.VISIBLE);
             btnAddComments.setText("Add comment");
+            btnLogout.setVisibility(View.VISIBLE);
         } else {
             txtComment.setVisibility(View.GONE);
             btnAddComments.setText("Login to comment");
+            btnLogout.setVisibility(View.GONE);
         }
+
+
 
         return mLayout;
     }
@@ -199,5 +210,38 @@ public class CommentsRatingDialogFragment extends DialogFragment {
 
         }
     };
+
+    private class btnShareListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            String shareBody = "I am now at " + lblLocationName.getText().toString() + "!";
+            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "iSTTS Campus");
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+            startActivity(Intent.createChooser(sharingIntent, "Share via"));
+        }
+
+    }
+
+    private class btnLogoutListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            loggedIn = false;
+            loggedUser = "";
+
+            SharedPreferences settings = getActivity().getSharedPreferences(
+                    "app.istts.ar", 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("loggeduser", "");
+            editor.putLong("lastlogin", 0);
+            editor.commit();
+
+            Toast.makeText(getActivity(), "Successfully Logged Out!", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
 }

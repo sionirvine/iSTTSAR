@@ -30,13 +30,13 @@ public class CommentsRatingDialogFragment extends DialogFragment {
     private RatingBar ratingBar1;
 
     ;;
-    static CommentsRatingDialogFragment setDialog(String name, String desc) {
+
+    static CommentsRatingDialogFragment setDialog(String name) {
         CommentsRatingDialogFragment f = new CommentsRatingDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
         args.putString("title", name);
-        args.putString("desc", desc);
         f.setArguments(args);
 
         return f;
@@ -70,7 +70,30 @@ public class CommentsRatingDialogFragment extends DialogFragment {
         lblLocationName = (TextView) mLayout.findViewById(R.id.lblLocationName);
         lblLocationName.setText(getArguments().getString("title"));
         lblLocationDesc = (TextView) mLayout.findViewById(R.id.lblLocationDesc);
-        lblLocationDesc.setText(getArguments().getString("desc"));
+        PostToWS getDescription = new PostToWS() {
+
+            @Override
+            public Void preExecute() {
+                lblLocationDesc.setText("");
+                return null;
+            }
+
+            @Override
+            public String postResult(String result) {
+
+                if (!result.trim().equals("") && !result.trim().equals("false")) {
+                    lblLocationDesc.setText(result);
+                }
+
+                return null;
+            }
+
+        };
+
+        getDescription.addData("name", lblLocationName.getText().toString());
+        getDescription.execute(new String[] {
+                "http://lach.hopto.org:8080/isttsar.ws/marker/getdesc"
+        });
 
         ratingBar1 = (RatingBar) mLayout.findViewById(R.id.ratingBar1);
         lblComment_Content = (TextView) mLayout.findViewById(R.id.lblComments_content);
@@ -107,7 +130,6 @@ public class CommentsRatingDialogFragment extends DialogFragment {
         };
 
         getComments.addData("lokasi", lblLocationName.getText().toString());
-
         getComments.execute(new String[] {
                 "http://lach.hopto.org:8080/isttsar.ws/comments/get"
         });

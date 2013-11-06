@@ -70,7 +70,7 @@ public abstract class PostToWS extends AsyncTask<String, String, String> {
 
                     Bitmap bmp = BitmapFactory.decodeFile(value);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                     byte[] pixels = stream.toByteArray();
                     request.write(pixels);
 

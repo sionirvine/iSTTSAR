@@ -186,6 +186,11 @@ public class CameraFragment extends Fragment {
         mCamera.takePicture(null, null, ocrHandler);
     }
 
+    public void takePictureOpenCV() {
+        final OpenCVHandler openCVHandler = new OpenCVHandler(getActivity().getApplicationContext());
+        mCamera.takePicture(null, null, openCVHandler);
+    }
+
     // ambil gambar dengan async. (untuk OCR)
     // tidak mengganggu UI.
     private Camera.PreviewCallback asyncTakePicture = new Camera.PreviewCallback() {
@@ -346,7 +351,7 @@ public class CameraFragment extends Fragment {
 
                 for (int i = 0; i < namaruangan.length; i++) {
                     if (text.matches(".*" + namaruangan[i] + ".*")) {
-                        mCallback.setLocationStatus(namaruangan[i]);
+                        // mCallback.setLocationStatus(namaruangan[i]);
                         mCallback.setIndoorLabel(namaruangan[i]);
                         Log.d(TAG, "MATCH: " + text);
                     }
@@ -360,6 +365,34 @@ public class CameraFragment extends Fragment {
             } catch (Exception error) {
                 Log.e(TAG, "OCR Failed : " + error.toString());
                 Toast.makeText(context, "OCR failed", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private class OpenCVHandler implements PictureCallback {
+
+        private final Context context;
+
+        public OpenCVHandler(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            try {
+                String path = getActivity().getExternalCacheDir().getAbsolutePath() + "/match.jpg";
+                Bitmap savedPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
+                Bitmap resizedBitmap = Bitmap.createScaledBitmap(savedPicture, 640, 480, true);
+
+                FileOutputStream out = new FileOutputStream(path);
+                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                out.close();
+
+                /** restart camera preview for resuming after taking picture **/
+                camera.startPreview();
+            } catch (Exception error) {
+                Log.e(TAG, "image could not be detected : " + error.toString());
+                Toast.makeText(context, "Image could not be detected.", Toast.LENGTH_LONG).show();
             }
         }
     }

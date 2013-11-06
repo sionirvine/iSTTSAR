@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   	<string-array name="drawermenu_array">
+        <item>iSTTS AR</item>
+        <item>Maps</item>
+        <item>Filter</item>
+        <item>Settings</item>
+    </string-array>
+</resources>

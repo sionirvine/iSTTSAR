@@ -2,17 +2,19 @@ package app.istts.ar;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -55,6 +57,10 @@ public class LocationFragment extends Fragment {
         public void swapFragment();
 
         public void takePictureWithOCR();
+
+        public void takePictureWithOpenCV();
+
+        public void setIndoorLabel(String location);
     }
 
     @Override
@@ -62,11 +68,8 @@ public class LocationFragment extends Fragment {
         LinearLayout mLayout = (LinearLayout) inflater.inflate(
                 R.layout.location_fragment, container, false);
 
-        Button btnMaps = (Button) mLayout.findViewById(R.id.btnMaps);
-        btnMaps.setOnClickListener(btnMapsListener);
-
         btnLocation = (ImageButton) mLayout.findViewById(R.id.btnLocation);
-        btnLocation.setOnClickListener(btnLocationListener);
+        btnLocation.setOnClickListener(new btnLocationListener());
 
         lblLocationStatus = (TextView) mLayout.findViewById(R.id.lblLocationStatus);
         lblIndoor = (TextView) mLayout.findViewById(R.id.lblIndoor);
@@ -94,29 +97,65 @@ public class LocationFragment extends Fragment {
     }
 
     /** BUTTON LISTENER **/
-    View.OnClickListener btnLocationListener = new View.OnClickListener() {
+    private class btnLocationListener implements View.OnClickListener {
+
         @Override
         public void onClick(View v) {
-            // toggle OCR on / off
-            if (lblLocationStatus.getText().toString().equals("Indoor")) {
-                // if (mOCRCallback.getOCRMode() == true) {
-                // mOCRCallback.setOCRMode(false);
-                // } else {
-                // mOCRCallback.setOCRMode(true);
-                // }
-                setLocationButtonVisible(false);
-                mOCRCallback.takePictureWithOCR();
+            // take picture with OCR
+            FragmentManager fm = getFragmentManager();
+
+            DialogFragment mDialog = new MatchDialogFragment();
+            mDialog.setTargetFragment(instance, 777);
+            mDialog.setRetainInstance(true);
+            mDialog.show(fm, "Match");
+
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        String item = data.getStringExtra("ITEM");
+
+        if (requestCode == 777) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (item.equals("OPENCV")) {
+                    mOCRCallback.takePictureWithOpenCV();
+
+                    PostToWS postURL = new PostToWS() {
+
+                        @Override
+                        public Void preExecute() {
+                            setLocationButtonVisible(false);
+                            return null;
+                        }
+
+                        @Override
+                        public String postResult(String result) {
+                            setLocationButtonVisible(true);
+                            mOCRCallback.setIndoorLabel(result);
+                            return result;
+                        }
+                    };
+
+                    postURL.addData("file", getActivity().getExternalCacheDir().getAbsolutePath()
+                            + "/match.jpg");
+
+                    postURL.execute(new String[] {
+                            "http://lach.hopto.org:8888/cgi/match_training"
+                    });
+
+                } else if (item.equals("TESSERACT")) {
+                    setLocationButtonVisible(false);
+                    mOCRCallback.takePictureWithOCR();
+
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                // nothing
             }
-
         }
-    };
-
-    View.OnClickListener btnMapsListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mOCRCallback.swapFragment();
-        }
-    };
+    }
 
     @Override
     public void onAttach(Activity activity) {

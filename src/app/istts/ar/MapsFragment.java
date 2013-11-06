@@ -1,3 +1,4 @@
+
 package app.istts.ar;
 
 import android.app.Activity;
@@ -55,26 +56,43 @@ public class MapsFragment extends Fragment {
         maps = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         maps.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-7.291322, 112.758876), 19f));
 
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // tampilkan marker
+        maps.clear();
         for (Marker m : ARData.getMarkers()) {
             Double latitude = m.getPhysicalLocation().getLatitude();
             Double longitude = m.getPhysicalLocation().getLongitude();
             String title = m.getName();
-            String namagedung = title.substring(title.length() - 1).toLowerCase();
+            String namagedung = title.substring(0, 1).toLowerCase();
 
             MarkerOptions marker = new MarkerOptions();
             marker.position(new LatLng(latitude, longitude));
             marker.title(title);
 
             if (namagedung.equals("n")) {
+                // cokelat
                 marker.icon(BitmapDescriptorFactory.defaultMarker(30));
             } else if (namagedung.equals("b")) {
+                // merah
                 marker.icon(BitmapDescriptorFactory.defaultMarker(0));
             } else if (namagedung.equals("l")) {
+                // biru
                 marker.icon(BitmapDescriptorFactory.defaultMarker(210));
             } else if (namagedung.equals("u")) {
+                // hijau muda
                 marker.icon(BitmapDescriptorFactory.defaultMarker(70));
             } else if (namagedung.equals("e")) {
+                // kuning
                 marker.icon(BitmapDescriptorFactory.defaultMarker(60));
+            } else if (namagedung.equals("m")) {
+                // pink
+                marker.icon(BitmapDescriptorFactory.defaultMarker(300));
             }
 
             maps.addMarker(marker);
@@ -88,16 +106,13 @@ public class MapsFragment extends Fragment {
                 marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.current_loc));
 
                 maps.addMarker(marker);
-                
+
                 Location location = new Location("B301");
                 location.setLatitude(-7.291153);
                 location.setLongitude(112.758765);
                 ARData.setCurrentLocation(location);
             }
         }
-
-
-        return view;
     }
 
     @Override

@@ -248,7 +248,12 @@ public class CameraFragment extends Fragment {
     View.OnClickListener autoFocusListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            mCamera.autoFocus(myAutoFocusCallback);
+            try {
+                mCamera.autoFocus(myAutoFocusCallback);
+            } catch (NullPointerException err) {
+                Log.d(TAG, "Camera autofocus null");
+            }
+
         }
     };
 

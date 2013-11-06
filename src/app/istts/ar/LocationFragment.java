@@ -4,11 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,8 +17,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.jwetherell.augmented_reality.data.ARData;
 
 /* LOCATIONFRAGMENT
  * show UI for manipulating location
@@ -76,22 +72,22 @@ public class LocationFragment extends Fragment {
 
         prgOCR = (ProgressBar) mLayout.findViewById(R.id.prgOCR);
 
-        final Handler handler = new Handler();
-        final Runnable getLocation = new Runnable() {
-            @Override
-            public void run() {
-                Location currentLocation = ARData.getCurrentLocation();
-                if (currentLocation != null) {
-                    if (currentLocation.getAccuracy() < 5.1f) {
-                        lblLocationStatus.setText("Outdoor");
-                    } else {
-                        lblLocationStatus.setText("Indoor");
-                    }
-                }
-                handler.postDelayed(this, 1000);
-            }
-        };
-        handler.post(getLocation);
+        // final Handler handler = new Handler();
+        // final Runnable getLocation = new Runnable() {
+        // @Override
+        // public void run() {
+        // Location currentLocation = ARData.getCurrentLocation();
+        // if (currentLocation != null) {
+        // if (currentLocation.getAccuracy() < 5.1f) {
+        // lblLocationStatus.setText("Outdoor");
+        // } else {
+        // lblLocationStatus.setText("Indoor");
+        // }
+        // }
+        // handler.postDelayed(this, 1000);
+        // }
+        // };
+        // handler.post(getLocation);
 
         return mLayout;
     }

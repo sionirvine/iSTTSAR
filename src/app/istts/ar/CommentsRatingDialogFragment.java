@@ -29,7 +29,7 @@ public class CommentsRatingDialogFragment extends DialogFragment {
     private String loggedUser;
     private RatingBar ratingBar1;
 
-    ;;
+
 
     static CommentsRatingDialogFragment setDialog(String name) {
         CommentsRatingDialogFragment f = new CommentsRatingDialogFragment();
@@ -119,6 +119,7 @@ public class CommentsRatingDialogFragment extends DialogFragment {
                         sb.append(usercommentrating[1] + "\n");
 
                         // TODO: MANAGE RATINGS
+                        ratingBar1.setRating(Float.parseFloat(usercommentrating[2]));
                     }
                     
                 }

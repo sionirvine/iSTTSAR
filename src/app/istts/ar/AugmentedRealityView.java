@@ -46,7 +46,7 @@ public class AugmentedRealityView extends View {
             }
             collection = cache;
 
-            adjustForCollisions(canvas, collection);
+            // adjustForCollisions(canvas, collection);
 
             // Draw AR markers in reverse order since the last drawn should be
             // the closest

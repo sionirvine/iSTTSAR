@@ -52,6 +52,7 @@ public class SensorsFragment extends Fragment implements
     public interface getLocation {
         public String getLocationStatus();
 
+        public void setLocationStatus(String location);
         public String getIndoorLabel();
     }
 
@@ -90,6 +91,8 @@ public class SensorsFragment extends Fragment implements
     private Editor mEditor; // shared preferences editor
     boolean mUpdatesRequested = true; // hold update request status for play
                                       // service
+
+    boolean firstTimeFix = true;
 
     /**
      * {@inheritDoc}
@@ -364,8 +367,23 @@ public class SensorsFragment extends Fragment implements
      */
     @Override
     public void onLocationChanged(Location location) {
+        if (firstTimeFix) {
+            ARData.setCurrentLocation(location);
+            firstTimeFix = false;
+        }
+
+        Boolean indoor = true;
+        if (location != null) {
+            if (location.getAccuracy() < 7.1f) {
+                mCallback.setLocationStatus("Outdoor");
+                indoor = false;
+            } else {
+                mCallback.setLocationStatus("Indoor");
+            }
+        }
+
         // if outdoor
-        if (mCallback.getLocationStatus().equals("outdoor")) {
+        if (indoor == false) {
             ARData.setCurrentLocation(location);
 
             // if indoor
@@ -380,7 +398,7 @@ public class SensorsFragment extends Fragment implements
                 @Override
                 public String postResult(String result) {
 
-                    if (!result.trim().equals("false") || result.length() > 1) {
+                    if (!result.trim().equals("false") && result.length() > 1) {
                         String[] split = result.split(",");
                         Double lat = Double.parseDouble(split[0]);
                         Double lng = Double.parseDouble(split[1]);

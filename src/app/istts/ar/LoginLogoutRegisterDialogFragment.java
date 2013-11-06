@@ -85,6 +85,7 @@ public class LoginLogoutRegisterDialogFragment extends DialogFragment {
                         // Commit the edits!
                         editor.commit();
                     }
+                    dismiss();
 
                     return null;
                 }
@@ -134,6 +135,7 @@ public class LoginLogoutRegisterDialogFragment extends DialogFragment {
                                 "Register Successful",
                                 Toast.LENGTH_SHORT).show();
                     }
+                    dismiss();
 
                     return null;
                 }

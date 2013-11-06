@@ -2,7 +2,6 @@
 package app.istts.ar;
 
 import android.app.Activity;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -126,8 +125,8 @@ public class MapsFragment extends Fragment {
 
                         // ketika indoor
                     } else {
-                        // tampilkan posisi dengan membaca hasil indoor
-                        // positioning
+                        // tampilkan posisi user dalam peta dengan membaca hasil
+                        // indoor positioning
                         if (!mCallback.getIndoorLabel().trim().equals("")) {
 
                             PostToWS postURL = new PostToWS() {
@@ -144,11 +143,7 @@ public class MapsFragment extends Fragment {
                                         String[] split = result.split(",");
                                         Double lat = Double.parseDouble(split[0]);
                                         Double lng = Double.parseDouble(split[1]);
-
-                                        Location location = new Location("myloc");
-                                        location.setLatitude(lat);
-                                        location.setLongitude(lng);
-                                        ARData.setCurrentLocation(location);
+                                        userLocation.setPosition(new LatLng(lat, lng));
                                     }
                                     return result;
                                 }

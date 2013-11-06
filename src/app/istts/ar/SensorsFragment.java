@@ -1,5 +1,6 @@
 package app.istts.ar;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -44,6 +45,14 @@ public class SensorsFragment extends Fragment implements
         if (instance == null)
             instance = new SensorsFragment();
         return instance;
+    }
+
+    private getLocation mCallback;
+
+    public interface getLocation {
+        public String getLocationStatus();
+
+        public String getIndoorLabel();
     }
 
     protected static final String TAG = "iSTTSAR::SensorsFragment";
@@ -252,6 +261,24 @@ public class SensorsFragment extends Fragment implements
         }
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallback = (getLocation) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement getLocation");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
+    };
+
     /**
      * {@inheritDoc}
      */
@@ -337,8 +364,42 @@ public class SensorsFragment extends Fragment implements
      */
     @Override
     public void onLocationChanged(Location location) {
+        // if outdoor
+        if (mCallback.getLocationStatus().equals("outdoor")) {
+            ARData.setCurrentLocation(location);
 
-        ARData.setCurrentLocation(location);
+            // if indoor
+        } else {
+            PostToWS postURL = new PostToWS() {
+
+                @Override
+                public Void preExecute() {
+                    return null;
+                }
+
+                @Override
+                public String postResult(String result) {
+
+                    if (!result.trim().equals("false") || result.length() > 1) {
+                        String[] split = result.split(",");
+                        Double lat = Double.parseDouble(split[0]);
+                        Double lng = Double.parseDouble(split[1]);
+
+                        Location location = new Location("myloc");
+                        location.setLatitude(lat);
+                        location.setLongitude(lng);
+                        ARData.setCurrentLocation(location);
+                    }
+                    return result;
+                }
+            };
+
+            postURL.addData("name", mCallback.getIndoorLabel().trim());
+
+            postURL.execute(new String[] {
+                    "http://lach.hopto.org:8080/isttsar.ws/marker/getlatlng"
+            });
+        }
 
         gmf = new GeomagneticField((float) ARData.getCurrentLocation().getLatitude(),
                 (float) ARData.getCurrentLocation().getLongitude(),

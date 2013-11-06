@@ -38,7 +38,8 @@ import java.io.OutputStream;
 
 public class MainActivity extends ActionBarActivity implements TrainFragment.CameraTakePicture,
         LocationFragment.CamTakePicture, LocationFragment.OCRTakePicture,
-        CameraFragment.setLocation, MapsFragment.getIndoorLocation {
+        CameraFragment.setLocation, MapsFragment.getIndoorLocation,
+        SensorsFragment.getLocation {
     
     private static final String TAG = "iSTTSAR::MainActivity";
     

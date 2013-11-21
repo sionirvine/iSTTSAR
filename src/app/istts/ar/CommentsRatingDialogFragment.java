@@ -31,6 +31,7 @@ public class CommentsRatingDialogFragment extends DialogFragment {
     private RatingBar ratingBar1;
     private Button btnLogout;
     private Button btnShare;
+    private Button btnDeleteMarker;
 
 
     static CommentsRatingDialogFragment setDialog(String name) {
@@ -144,18 +145,27 @@ public class CommentsRatingDialogFragment extends DialogFragment {
         btnShare = (Button) mLayout.findViewById(R.id.btnShare);
         btnShare.setOnClickListener(new btnShareListener());
         btnAddComments.setOnClickListener(btnAddCommentsListener);
+        btnDeleteMarker = (Button) mLayout.findViewById(R.id.btnDeleteMarker);
+        btnDeleteMarker.setOnClickListener(new btnDeleteMarkerListener());
 
         if (loggedIn) {
             txtComment.setVisibility(View.VISIBLE);
             btnAddComments.setText("Add comment");
             btnLogout.setVisibility(View.VISIBLE);
+
         } else {
             txtComment.setVisibility(View.GONE);
             btnAddComments.setText("Login to comment");
             btnLogout.setVisibility(View.GONE);
         }
 
-
+        SharedPreferences settings = getActivity().getSharedPreferences("app.istts.ar", 0);
+        String user = settings.getString("loggeduser", "");
+        if (user.toLowerCase().equals("admin")) {
+            btnDeleteMarker.setVisibility(View.VISIBLE);
+        } else {
+            btnDeleteMarker.setVisibility(View.GONE);
+        }
 
         return mLayout;
     }
@@ -240,6 +250,40 @@ public class CommentsRatingDialogFragment extends DialogFragment {
             editor.commit();
 
             Toast.makeText(getActivity(), "Successfully Logged Out!", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private class btnDeleteMarkerListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            PostToWS postURL = new PostToWS() {
+
+                @Override
+                public Void preExecute() {
+                    return null;
+                }
+
+                @Override
+                public String postResult(String result) {
+
+                    if (!result.trim().equals("false")) {
+                        Toast.makeText(getActivity(), "Marker sucessfully deleted!",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), "Marker failed to delete!",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    return null;
+                }
+            };
+
+            postURL.addData("name", lblLocationName.getText().toString());
+
+            postURL.execute(new String[] {
+                    "http://lach.hopto.org:8080/isttsar.ws/marker/delete"
+            });
         }
 
     }

@@ -70,9 +70,15 @@ public abstract class PostToWS extends AsyncTask<String, String, String> {
 
                     Bitmap bmp = BitmapFactory.decodeFile(value);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    byte[] pixels = stream.toByteArray();
-                    request.write(pixels);
+                    try {
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                        byte[] pixels = stream.toByteArray();
+                        request.write(pixels);
+                    } catch (RuntimeException err) {
+                        // do nothing
+                    }
+
+
 
                     /*****************/
                     // I want to send only 8 bit black & white bitmaps

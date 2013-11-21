@@ -47,8 +47,8 @@ public class AugmentedRealityFragment extends SensorsFragment implements OnTouch
         super.onCreate(savedInstanceState);
         augmentedRealityView = new AugmentedRealityView(getActivity());
 
-        ARData.setRadius(5f);
-        ARData.setZoomLevel(FORMAT.format(5f));
+        ARData.setRadius(0.05f);
+        ARData.setZoomLevel(FORMAT.format(0.1f));
         // Local
         MarkerDataSource localData = new MarkerDataSource(this.getResources());
         // ARData.addMarkers(localData.getMarkers());

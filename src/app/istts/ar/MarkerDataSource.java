@@ -91,8 +91,14 @@ public class MarkerDataSource extends DataSource {
                                 String[] latLng = nameLatlngLantaiGedung[1].split(",");
                                 double latitude = Double.parseDouble(latLng[0]);
                                 double longitude = Double.parseDouble(latLng[1]);
-                                // int lantai =
-                                // Integer.parseInt(nameLatlngLantaiGedung[2]);
+                                int lantai = Integer.parseInt(nameLatlngLantaiGedung[2]);
+                                double altitude = 0;
+                                if (lantai == 1) {
+                                    altitude = 0;
+                                } else {
+                                    altitude = lantai;
+                                }
+
                                 String gedung = nameLatlngLantaiGedung[3];
                                 int color = 0;
                                 Bitmap icon = null;
@@ -115,7 +121,7 @@ public class MarkerDataSource extends DataSource {
                                 }
 
                                 Marker marker = new IconMarker(name, latitude, longitude,
-                                        0,
+                                        altitude,
                                         color,
                                         icon);
 
